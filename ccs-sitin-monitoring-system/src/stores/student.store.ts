@@ -13,6 +13,7 @@ export const useStudentStore = defineStore("student",() => {
         email: '',
         username: '',
         password: '',
+        sessions: ''
     })
 
     function setStudent(studentInfo: any) {
@@ -25,7 +26,7 @@ export const useStudentStore = defineStore("student",() => {
         student.email = studentInfo.email;
         student.username = studentInfo.username;
         student.password = studentInfo.password;
-
+        student.sessions = studentInfo.sessions;
     }
 
     function getStudent() {

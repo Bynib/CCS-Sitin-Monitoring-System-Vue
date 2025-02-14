@@ -29,7 +29,7 @@ const handleLogin = async () => {
       
       studentStore.setStudent(response.studentInfo);
       // Store username in localStorage
-      localStorage.setItem('username', username.value);
+      // localStorage.setItem('username', username.value);
 
       window.location.href = '/dashboard'; // Redirect to dashboard
     } else {

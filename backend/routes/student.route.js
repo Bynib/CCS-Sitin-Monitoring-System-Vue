@@ -29,6 +29,17 @@ router.post("/login", (req, res) => {
   );
 })
 
+router.post("/update", (req, res) => {
+  const { lastname, firstname, middlename, course, yearlevel, email, username, password } = req.body;
+  connection.query("UPDATE student SET lastname = ?, firstname = ?, middlename = ?, course = ?, yearlevel = ?, email = ?, username = ?, password = ? WHERE idno = ?",
+  [lastname, firstname, middlename, course, yearlevel, email, username, password, req.body.idno],
+  (err, rows, fields) => {
+    if (err) throw err;
+    res.json(rows);
+  }
+  )
+})
+
 
 router.get("/:username", (req, res) => {
   const username = req.params.id;
@@ -55,7 +66,7 @@ router.post("/", (req, res) => {
     password,
   } = req.body;
   connection.query(
-    "INSERT INTO student VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+    "INSERT INTO student(idno, lastname, firstname, middlename, course, yearlevel, email, username, password) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
     [
       idno,
       lastname,
@@ -73,5 +84,12 @@ router.post("/", (req, res) => {
     }
   );
 });
+
+router.post('/session/:id', (req, res) => {
+  const id = req.params.id;
+  connection.query("UPDATE student SET sessions = sessions-1 WHERE idno = ?", [id], (err, rows, fields) => {
+    if (err) throw err;
+})
+})
 
 export default router;

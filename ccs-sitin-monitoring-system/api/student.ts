@@ -23,3 +23,13 @@ export const findUser = async(student: {username:String}) => {
     const response = await axios.post(`http://localhost:3000/student/username`, student);
     return response.data;
 }
+
+export const updateStudent = async(student: {firstname:String, middlename:String, lastname:String, email:String, course:String, yearlevel:String, username:String, password:String}) => {
+    const response = await axios.post(`http://localhost:3000/student/update`, student);
+    return response.data;    
+}
+
+export const updateSession = async(id: Number) => {
+    const response = await axios.post(`http://localhost:3000/student/session/${id}`);
+    return response.data;
+}
