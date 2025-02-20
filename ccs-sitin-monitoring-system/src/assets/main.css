@@ -21,6 +21,12 @@ button {
     @apply bg-white text-black
   }
   .normalButton{
-    @apply text-white font-bold
+    @apply text-gray-400 font-bold
+  }
+  .header{
+    @apply text-[clamp(0.8rem,2vw,3rem)] font-bold flex gap-5
+  }
+  .announcementContent{
+    @apply pl-10
   }
 }

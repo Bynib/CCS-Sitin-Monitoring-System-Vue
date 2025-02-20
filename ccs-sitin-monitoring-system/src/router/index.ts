@@ -38,18 +38,18 @@ const router = createRouter({
       component: Announcement
     },
     {
-      path: '/sitinrules',
-      name: 'sitinrules',
+      path: '/sitin-rules',
+      name: 'sitin-rules',
       component: SitInRules
     },
     {
-      path: '/labrules',
-      name: 'labrules',
+      path: '/laboratory-rules',
+      name: 'laboratory-rules',
       component: LabRulesView
     },
     {
-      path: '/sitinhistory',
-      name: 'sitinhistory',
+      path: '/sitin-history',
+      name: 'sitin-history',
       component: SitinHistoryView
     },
     {

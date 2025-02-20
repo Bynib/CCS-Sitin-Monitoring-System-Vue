@@ -15,7 +15,7 @@ const userDetails = reactive({
   course: studentStore.student.course,
   yearlevel: studentStore.student.yearLevel,
   username: studentStore.student.username,
-  sessions: studentStore.student.sessions
+  sessions: studentStore.student.sessions,
 })
 
 console.log(userDetails.idno)
@@ -28,34 +28,44 @@ const handleEdit = () => {
 }
 
 const handleSubmitEdit = () => {
-  const student = {
-    idno: userDetails.idno,
-    firstname: userDetails.firstname,
-    middlename: userDetails.middlename,
-    lastname: userDetails.lastname,
-    email: userDetails.email,
-    password: userDetails.password,
-    course: userDetails.course,
-    yearlevel: userDetails.yearlevel,
-    username: userDetails.username,
-  }
-  try {
-    updateStudent(student)
-    studentStore.setStudent(student)
-    isDisabled.value = true
-    alert('Successfully Updated!')
-  } catch (error) {
-    console.error(error)
+  if (
+    userDetails.firstname.trim() === '' ||
+    userDetails.lastname.trim() === '' ||
+    userDetails.email.trim() === '' ||
+    userDetails.username.trim() === ''
+  ) {
+    alert('Please fill out all necesarry fields.')
+  } else {
+    const student = {
+      idno: userDetails.idno,
+      firstname: userDetails.firstname,
+      middlename: userDetails.middlename,
+      lastname: userDetails.lastname,
+      email: userDetails.email,
+      password: userDetails.password,
+      course: userDetails.course,
+      yearlevel: userDetails.yearlevel,
+      username: userDetails.username,
+      sessions: Number(userDetails.sessions),
+    }
+    try {
+      updateStudent(student)
+      studentStore.setStudent(student)
+      isDisabled.value = true
+      alert('Successfully Updated!')
+    } catch (error) {
+      console.error(error)
+    }
   }
 }
 </script>
 
 <template>
   <div
-    class="flex flex-col items-center justify-center h-screen w-screen pt-20 bg-gray-700 gap-3 text-gray-300"
+    class="flex flex-col items-center justify-center h-screen w-screen pt-20 gap-3 text-gray-300"
   >
-    <div class="font-extrabold text-[clamp(2rem,5vw,3rem)]">Student Profile</div>
-    <div class="flex flex-row items-center justify-center w-screen text-gray-300">
+    <!-- <div class="font-extrabold text-[clamp(2rem,5vw,3rem)]">Student Profile</div> -->
+    <div class="flex flex-row items-center justify-center w-screen text-gray-300 gap-10">
       <div class="mb-40 flex flex-col items-center gap-5" style="width: 15rem; height: 15rem">
         <img
           src="@/assets/avatar.jpeg"
@@ -176,7 +186,8 @@ const handleSubmitEdit = () => {
         </button>
         <button
           @click="handleSubmitEdit"
-          class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded transition-colors duration-400"
+          :class="isDisabled === true ? 'opacity-50 bg-green-500 text-white font-bold py-2 px-4 rounded ' : 'bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded transition-colors duration-400 '"
+          :disabled="isDisabled"
         >
           SAVE
         </button>

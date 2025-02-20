@@ -1,6 +1,6 @@
 <script setup lang="ts">
   import { reactive } from 'vue'
-  import {useRoute} from 'vue-router'
+  import {useRoute, useRouter} from 'vue-router'
   import {useStudentStore} from '@/stores/student.store'
   import { updateSession } from '../../api/student';
 
@@ -11,39 +11,52 @@
   })
 
   const route = useRoute();
+  const router = useRouter();
 
   const goToProfile = () => {
-    window.location.href = '/dashboard'
+    router.push('/dashboard')
   }
 
   const goToAnnouncement =()=>{
-    window.location.href = '/announcement'
+    router.push('/announcement')
   }
   
   const goToSitinRules = () => {
-    window.location.href = '/sitinrules'
+    router.push('/sitin-rules')
   }
 
   const goToLabRules = () => {
-    window.location.href='/labrules'
+    router.push('/laboratory-rules')
   }
 
   const goToSitinHistory = () => {
-    window.location.href='/sitinhistory'
+    router.push('/sitin-history')
   }
 
   const goToReservation = () => {
-    window.location.href='/reservation'
+    router.push('/reservation')
   }
 
   const handleLogout = ()=>{
-    updateSession(userDetail.idno);
+    // updateSession(userDetail.idno);
+    studentStore.setStudent({
+      idNo: '',
+      firstName: '',
+      middleName: '',
+      lastName: '',
+      email: '',
+      course: '',
+      yearLevel: '',
+      username: '',
+      password: '',
+      sessions: ''
+    });
     window.location.href='/'
   }
 </script>
 
 <template>
-  <div class="flex justify-between absolute w-screen p-5 bg-[#2e2e2e]">
+  <div class="flex justify-between fixed w-screen p-5">
     <div class="flex justify-between w-screen">
       <img
         src="@/assets/CCS_LOGO.png"
@@ -57,15 +70,15 @@
         <button v-else class="normalButton border-b-2">Profile</button> -->
         <button @click="goToProfile" :class="route.path === '/dashboard' ? 'normalButton border-b-2' : 'normalButton'">Profile</button>
         <button @click="goToAnnouncement" :class="route.path === '/announcement' ? 'normalButton border-b-2' : 'normalButton'" class="normalButton">Announcement</button>
-        <button @click="goToSitinRules" :class="route.path === '/sitinrules' ? 'normalButton border-b-2' : 'normalButton'" class="normalButton">Sit-in Rules</button>
-        <button @click="goToLabRules" :class="route.path === '/labrules' ? 'normalButton border-b-2' : 'normalButton'" class="normalButton">Lab Rules and Regulation</button>
-        <button @click="goToSitinHistory" :class="route.path === '/sitinhistory' ? 'normalButton border-b-2' : 'normalButton'" class="normalButton">Sitin History</button>
+        <button @click="goToSitinRules" :class="route.path === '/sitin-rules' ? 'normalButton border-b-2' : 'normalButton'" class="normalButton">Sit-in Rules</button>
+        <button @click="goToLabRules" :class="route.path === '/laboratory-rules' ? 'normalButton border-b-2' : 'normalButton'" class="normalButton">Lab Rules and Regulation</button>
+        <button @click="goToSitinHistory" :class="route.path === '/sitin-history' ? 'normalButton border-b-2' : 'normalButton'" class="normalButton">Sitin History</button>
         <button @click="goToReservation" :class="route.path === '/reservation' ? 'normalButton border-b-2' : 'normalButton'" class="normalButton">Reservation</button>
         <button
           @click="handleLogout"
           class="font-bold text-white bg-red-500 hover:bg-red-600 rounded p-2 transition-colors duration-400"
         >
-          Logout
+          LOGOUT
         </button>
       </div>
     </div>

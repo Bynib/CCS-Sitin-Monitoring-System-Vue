@@ -13,9 +13,9 @@ router.get("/", (req, res) => {
 router.post("/login", (req, res) => {
   const { username, password } = req.body;
   const lowercaseUsername = username.toLowerCase()
-  console.log(`Select * FROM student WHERE username = ${lowercaseUsername} AND password = ${password}`);
+  // console.log(`Select * FROM student WHERE username = '${lowercaseUsername} AND password = ${password} AND sessions > 0`);
   connection.query(
-    "SELECT * FROM student WHERE username = ? AND password = ?",
+    "SELECT * FROM student WHERE username = ? AND password = ? AND sessions > 0",
     [lowercaseUsername, password],
     (err, rows, fields) => {
       if (err) throw err;
@@ -30,9 +30,9 @@ router.post("/login", (req, res) => {
 })
 
 router.post("/update", (req, res) => {
-  const { lastname, firstname, middlename, course, yearlevel, email, username, password } = req.body;
-  connection.query("UPDATE student SET lastname = ?, firstname = ?, middlename = ?, course = ?, yearlevel = ?, email = ?, username = ?, password = ? WHERE idno = ?",
-  [lastname, firstname, middlename, course, yearlevel, email, username, password, req.body.idno],
+  const { lastname, firstname, middlename, course, yearlevel, email, username, password, sessions, idno } = req.body;
+  connection.query("UPDATE student SET lastname = ?, firstname = ?, middlename = ?, course = ?, yearlevel = ?, email = ?, username = ?, password = ?, sessions = ? WHERE idno = ?",
+  [lastname, firstname, middlename, course, yearlevel, email, username, password, sessions, idno],
   (err, rows, fields) => {
     if (err) throw err;
     res.json(rows);
