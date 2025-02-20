@@ -1,6 +1,7 @@
 @import './base.css';
 @import "tailwindcss";
 @import 'primeicons/primeicons.css';
+@import "@fontsource/montserrat";
 
 ::-webkit-scrollbar{
   display: none;

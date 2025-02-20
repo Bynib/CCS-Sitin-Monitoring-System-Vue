@@ -5,7 +5,7 @@
       <div>COLLEGE OF INFORMATION AND COMPUTER STUDIES</div>
       <div>LABORATORY RULES AND REGULATIONS</div>
     </div>
-    <div class=" flex flex-col w-1/2 overflow-scroll text-justify gap-5">
+    <div class=" flex flex-col w-1/2 overflow-scroll text-justify gap-5 font-montserrat">
         <div>
           To avoid embarrassment and maintain camaraderie with your friends and superiors at our
           laboratories, please observe the following:

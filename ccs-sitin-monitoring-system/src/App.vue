@@ -2,6 +2,7 @@
 import { RouterView, useRoute } from 'vue-router'
 import NavbarLandingView from '@/components/NavbarLandingView.vue'
 import Navbar from '@/components/NavbarView.vue'
+import "@fontsource/montserrat/500.css"
 
 const currentRoute = useRoute();
 
