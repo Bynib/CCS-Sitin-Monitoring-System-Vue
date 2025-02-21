@@ -26,7 +26,7 @@ export const findUser = async(student: {username:String}) => {
 
 export const updateStudent = async(student: {firstname:String, middlename:String, lastname:String, email:String, course:String, yearlevel:String, username:String, password:String, sessions: Number}) => {
     const response = await axios.post(`http://localhost:3000/student/update`, student);
-    return response.data;    
+    return response.data;  
 }
 
 export const updateSession = async(id: Number) => {
