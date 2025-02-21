@@ -15,14 +15,15 @@ const showPassword = ref(false)
 
 const handleLogin = async () => {
   
-  
   try {
     const student = {
       username: username.value,
       password: password.value
     };
+    console.log(student)
     
     const response = await findStudent(student);
+    console.log("123")
 
     if (response && response.success) {
       console.log("Student found");
