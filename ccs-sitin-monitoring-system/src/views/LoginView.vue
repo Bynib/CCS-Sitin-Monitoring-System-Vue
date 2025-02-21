@@ -1,11 +1,13 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { findStudent, getStudent } from '../../api/student';
+import { useRouter } from 'vue-router';
 
 import { reactive } from 'vue';
 
 import { useStudentStore } from '@/stores/student.store';
 
+const router = useRouter();
 const studentStore = useStudentStore();
 
 
@@ -32,7 +34,7 @@ const handleLogin = async () => {
       // Store username in localStorage
       // localStorage.setItem('username', username.value);
 
-      window.location.href = '/dashboard'; // Redirect to dashboard
+      router.push('/dashboard'); // Redirect to dashboard
     } else {
       alert("Invalid username or password");
     }

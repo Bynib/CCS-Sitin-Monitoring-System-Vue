@@ -1,13 +1,13 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import LandingView from '@/views/LandingView.vue';
 import LoginView from '@/views/LoginView.vue';
-import RegistrationView from '@/views/RegistrationView.vue';
-import DashboardView from '@/views/DashboardView.vue';
-import Announcement from '@/views/AnnouncementView.vue';
+import RegistrationView from '@/views/student/RegistrationView.vue';
+import ProfileView from '@/views/student/ProfileView.vue';
+import Dashboard from '@/views/student/DashboardView.vue';
 import SitInRules from '@/views/SitInRulesView.vue';
-import LabRulesView from '@/views/LabRulesView.vue';
-import SitinHistoryView from '@/views/SitinHistoryView.vue';
-import ReservationView from '@/views/ReservationView.vue';
+import LabRulesView from '@/views/student/LabRulesView.vue';
+import SitinHistoryView from '@/views/student/SitinHistoryView.vue';
+import ReservationView from '@/views/student/ReservationView.vue';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -28,14 +28,14 @@ const router = createRouter({
       component: RegistrationView
     },
     {
-      path: '/dashboard',
-      name: 'dashboard',
-      component: DashboardView
+      path: '/profile',
+      name: 'profile',
+      component: ProfileView
     },
     {
-      path: '/announcement',
-      name: 'announcement',
-      component: Announcement
+      path: '/dashboard',
+      name: 'dashboard',
+      component: Dashboard
     },
     {
       path: '/sitin-rules',

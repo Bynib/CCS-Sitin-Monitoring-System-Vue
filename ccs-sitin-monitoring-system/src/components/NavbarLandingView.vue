@@ -1,3 +1,11 @@
+<script>
+import { useRouter } from 'vue-router';
+const router = useRouter();
+const handleLoginButtonClick = () => {
+  router.push('/login');
+}
+</script>
+
 <template>
   <div class="flex justify-between absolute w-screen p-5">
     <!-- <div v-if="$route.name !== 'home'" class="flex justify-between w-screen">
@@ -16,7 +24,7 @@
         v-if="$route.name !== 'login' && $route.name !== 'register'"
       >
         <button
-          onclick="window.location.href = '/login'"
+          onclick="window.location.href='/login'"
           class="bg-violet-700 hover:bg-violet-900 text-white font-bold py-2 px-4 rounded transition-colors duration-400"
         >
           LOGIN

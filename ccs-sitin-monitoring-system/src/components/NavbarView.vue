@@ -14,11 +14,11 @@
   const router = useRouter();
 
   const goToProfile = () => {
-    router.push('/dashboard')
+    router.push('/profile')
   }
 
   const goToAnnouncement =()=>{
-    router.push('/announcement')
+    router.push('/dashboard')
   }
   
   const goToSitinRules = () => {
@@ -68,12 +68,12 @@
       <div class="flex items-center gap-5 pr-2">
         <!-- <button v-if="route.path === 'dashboard'" class="normalButton">Profile</button>
         <button v-else class="normalButton border-b-2">Profile</button> -->
-        <button @click="goToProfile" :class="route.path === '/dashboard' ? 'normalButton border-b-2' : 'normalButton'">Profile</button>
-        <button @click="goToAnnouncement" :class="route.path === '/announcement' ? 'normalButton border-b-2' : 'normalButton'" class="normalButton">Announcement</button>
-        <button @click="goToSitinRules" :class="route.path === '/sitin-rules' ? 'normalButton border-b-2' : 'normalButton'" class="normalButton">Sit-in Rules</button>
-        <button @click="goToLabRules" :class="route.path === '/laboratory-rules' ? 'normalButton border-b-2' : 'normalButton'" class="normalButton">Lab Rules and Regulation</button>
-        <button @click="goToSitinHistory" :class="route.path === '/sitin-history' ? 'normalButton border-b-2' : 'normalButton'" class="normalButton">Sitin History</button>
-        <button @click="goToReservation" :class="route.path === '/reservation' ? 'normalButton border-b-2' : 'normalButton'" class="normalButton">Reservation</button>
+        <button @click="goToAnnouncement" :class="route.path === '/dashboard' ? 'normalButton border-b-2 border-b-yellow-300' : 'normalButton'" class="normalButton">Announcement</button>
+        <button @click="goToSitinRules" :class="route.path === '/sitin-rules' ? 'normalButton border-b-2 border-b-yellow-300' : 'normalButton'" class="normalButton">Sit-in Rules</button>
+        <button @click="goToLabRules" :class="route.path === '/laboratory-rules' ? 'normalButton border-b-2 border-b-yellow-300' : 'normalButton'" class="normalButton">Lab Rules and Regulation</button>
+        <button @click="goToSitinHistory" :class="route.path === '/sitin-history' ? 'normalButton border-b-2 border-b-yellow-300' : 'normalButton'" class="normalButton">Sitin History</button>
+        <button @click="goToReservation" :class="route.path === '/reservation' ? 'normalButton border-b-2 border-b-yellow-300' : 'normalButton'" class="normalButton">Reservation</button>
+        <button @click="goToProfile" :class="route.path === '/profile' ? 'normalButton border-b-2 border-b-yellow-300' : 'normalButton'">Profile</button>
         <button
           @click="handleLogout"
           class="font-bold text-white bg-red-500 hover:bg-red-600 rounded p-2 transition-colors duration-400"

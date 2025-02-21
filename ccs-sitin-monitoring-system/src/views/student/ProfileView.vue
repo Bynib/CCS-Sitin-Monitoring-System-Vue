@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, reactive } from 'vue'
 import { useStudentStore } from '@/stores/student.store'
-import { updateStudent } from '../../api/student'
+import { updateStudent } from '../../../api/student'
 
 const studentStore = useStudentStore()
 
