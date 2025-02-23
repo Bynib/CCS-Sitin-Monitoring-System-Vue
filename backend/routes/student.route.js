@@ -4,7 +4,7 @@ import connection from "../db.js";
 const router = express.Router();
 
 router.get("/", (req, res) => {
-  connection.query("SELECT * FROM student", (err, rows, fields) => {
+  connection.query("SELECT * FROM student WHERE isAdmin = 0", (err, rows, fields) => {
     if (err) throw err;
     res.json(rows);
   });
@@ -13,7 +13,6 @@ router.get("/", (req, res) => {
 router.post("/login", (req, res) => {
   const { username, password } = req.body;
   const lowercaseUsername = username.toLowerCase()
-  // console.log(`Select * FROM student WHERE username = '${lowercaseUsername} AND password = ${password} AND sessions > 0`);
   connection.query(
     "SELECT * FROM student WHERE username = ? AND password = ? AND sessions > 0",
     [lowercaseUsername, password],

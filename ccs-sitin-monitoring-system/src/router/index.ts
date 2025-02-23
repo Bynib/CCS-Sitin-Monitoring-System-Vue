@@ -8,6 +8,9 @@ import SitInRules from '@/views/SitInRulesView.vue';
 import LabRulesView from '@/views/student/LabRulesView.vue';
 import SitinHistoryView from '@/views/student/SitinHistoryView.vue';
 import ReservationView from '@/views/student/ReservationView.vue';
+import AdminHome from '@/views/admin/HomeView.vue';
+import Students from '@/views/admin/StudentsView.vue';
+import AddAnnouncementModal from '@/components/AddAnnouncementModalView.vue';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -56,6 +59,21 @@ const router = createRouter({
       path: '/reservation',
       name: 'reservation',
       component: ReservationView
+    },
+    {
+      path: '/admin',
+      name: 'admin',
+      component: AdminHome
+    },
+    {
+      path: '/students',
+      name: 'students',
+      component: Students
+    },
+    {
+      path: '/add-announcement',
+      name: 'add-announcement',
+      component: AddAnnouncementModal
     }
   ],
 })

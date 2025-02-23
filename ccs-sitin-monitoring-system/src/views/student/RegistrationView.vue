@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import {addStudent} from '@/../api/student'
+import { addStudent } from '@/../api/student'
 
 const inputCredentials = ref(false)
 const idno = ref('')
@@ -15,9 +15,23 @@ const password = ref('')
 
 const showPassword = ref(false)
 
-const handleContinue = () => {  
-  inputCredentials.value = true
-
+const handleContinue = () => {
+  if (
+    !idno.value ||
+    !firstname.value ||
+    !lastname.value ||
+    !email.value ||
+    !course.value ||
+    !yearlevel.value
+  ) {
+    alert('Please fill out all the fields.')
+  } else if (!Number(idno.value)) {
+    alert('Please enter a valid ID number.')
+  } else if (email.value && !/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email.value)) {
+    alert('Please enter a valid email address.')
+  } else {
+    inputCredentials.value = true
+  }
 }
 
 const handleAddStudent = async () => {
@@ -30,12 +44,12 @@ const handleAddStudent = async () => {
     course: course.value,
     yearlevel: yearlevel.value,
     username: username.value,
-    password: password.value
+    password: password.value,
   }
   const response = await addStudent(student)
-  console.log("student added", response)
-  alert("Successfully Registered! Please login.")
-  window.location.href ='/login';
+  console.log('student added', response)
+  alert('Successfully Registered! Please login.')
+  window.location.href = '/login'
 }
 
 const handleBack = () => {
@@ -61,7 +75,7 @@ const handlePasswordVisibility = () => {
       >
         Create Your Account
       </h1>
-      <form class="w-[clamp(1rem,30vw,15rem)] ">
+      <form class="w-[clamp(1rem,30vw,15rem)]">
         <div class="flex flex-col gap-5 text-yellow-100 justify-center">
           <input id="idnoinput" type="text" placeholder="idno" v-model="idno" class="input" />
           <input
@@ -116,8 +130,8 @@ const handlePasswordVisibility = () => {
       </form>
     </div>
     <div
-      class="bg-[#2e2e2e] w-[clamp(2rem,50vw,30rem)]  h-2/4 flex flex-col justify-center items-center rounded-2xl gap-5 text-center absolute"
-      v-if="inputCredentials"
+      class="bg-[#2e2e2e] w-[clamp(2rem,50vw,30rem)] h-2/4 flex flex-col justify-center items-center rounded-2xl gap-5 text-center absolute"
+      v-else
     >
       <i
         class="pi pi-arrow-left absolute left-5 top-5 text-white cursor-pointer"
@@ -129,7 +143,7 @@ const handlePasswordVisibility = () => {
       >
         Set Credentials
       </h1>
-      <form class="w-[clamp(1rem,30vw,15rem)] ">
+      <form class="w-[clamp(1rem,30vw,15rem)]">
         <div class="flex flex-col gap-5 text-yellow-100 justify-center">
           <input
             id="usernameinput"
@@ -138,7 +152,7 @@ const handlePasswordVisibility = () => {
             v-model="username"
             class="input"
           />
-          <div class="flex text-yellow-100 justify-between ">
+          <div class="flex text-yellow-100 justify-between">
             <input
               id="passwordinput"
               :type="showPassword ? 'text' : 'password'"
@@ -148,19 +162,18 @@ const handlePasswordVisibility = () => {
             />
             <div>
               <i
-              v-if="showPassword === false"
-              class="pi pi-eye-slash absolute -ml-5 cursor-pointer"
-              style="font-size: 15px"
-              @click.prevent="handlePasswordVisibility"
-            ></i>
-            <i
-              v-if="showPassword === true"
-              class="pi pi-eye absolute -ml-5 cursor-pointer"
-              style="font-size: 15px"
-              @click.prevent="handlePasswordVisibility"
-            ></i>
+                v-if="showPassword === false"
+                class="pi pi-eye-slash absolute -ml-5 cursor-pointer"
+                style="font-size: 15px"
+                @click.prevent="handlePasswordVisibility"
+              ></i>
+              <i
+                v-if="showPassword === true"
+                class="pi pi-eye absolute -ml-5 cursor-pointer"
+                style="font-size: 15px"
+                @click.prevent="handlePasswordVisibility"
+              ></i>
             </div>
-            
           </div>
           <button
             @click.prevent="handleAddStudent"
