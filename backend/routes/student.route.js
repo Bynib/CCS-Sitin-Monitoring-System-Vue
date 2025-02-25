@@ -52,6 +52,15 @@ router.get("/:username", (req, res) => {
   );
 });
 
+router.get("/id/:id", (req, res) => {
+  const idno = req.params.id;
+  connection.query("SELECT * FROM student WHERE idno = ?", [idno], (err, rows, fields) => {
+    if (err) throw err;
+    console.log(rows)
+    res.json(rows);
+  });
+})
+
 router.post("/", (req, res) => {
   const {
     idno,

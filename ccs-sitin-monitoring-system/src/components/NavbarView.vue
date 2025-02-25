@@ -1,8 +1,13 @@
 <script setup lang="ts">
-import { reactive } from 'vue'
+import { reactive, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useStudentStore } from '@/stores/student.store'
 import { updateSession } from '../../api/student'
+import  SearchModalView from '@/components/SearchModalView.vue'
+
+const state = reactive({
+  showModal: false,
+})
 
 const studentStore = useStudentStore()
 console.log(studentStore.student.username)
@@ -41,6 +46,9 @@ const gotoHome = () => {
   router.push('/admin')
 }
 
+const goToSearch = () => {
+  state.showModal = true
+}
 const gotoStudents = () => {
   router.push('/students')
 }
@@ -64,6 +72,10 @@ const handleLogout = () => {
 </script>
 
 <template>
+  <SearchModalView
+  v-if="state.showModal"
+  class="fixed flex flex-col justify-center items-center bg-gray-800 p-4 rounded drop-shadow z-50"
+  />
   <div class="flex justify-between fixed w-screen p-5">
     <div class="flex justify-between w-screen">
       <img
@@ -83,6 +95,15 @@ const handleLogout = () => {
         >
           Home
         </button>
+        <button
+          @click="goToSearch"
+          :class="
+            route.path === '/search' ? 'normalButton border-b-2 border-b-yellow-300' : 'normalButton'
+          "
+        >
+          Search
+        </button>
+        
         <button
           @click="gotoStudents"
           :class="

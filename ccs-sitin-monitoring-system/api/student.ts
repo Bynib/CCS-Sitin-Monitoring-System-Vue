@@ -6,7 +6,7 @@ export const getStudents = async () => {
 }
 
 export const getStudent = async (id: number) => {
-    const response = await axios.get(`http://localhost:3000/student/${id}`);
+    const response = await axios.get(`http://localhost:3000/student/id/${id}`);
     return response.data;
 }
 
