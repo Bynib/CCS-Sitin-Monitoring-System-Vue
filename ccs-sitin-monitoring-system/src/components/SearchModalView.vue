@@ -19,8 +19,12 @@ const student = reactive({
 
 
 const handleSearch = async () => {
-  openSitinModal.value = true
-  const result = await getStudent(idno.value)
+  if (!idno.value){
+    alert("please provide IDNo")
+  } else {
+
+    openSitinModal.value = true
+    const result = await getStudent(idno.value)
     student.idno = result[0].idno
     student.firstname = result[0].firstname
     student.middlename = result[0].middlename
@@ -30,6 +34,7 @@ const handleSearch = async () => {
     student.yearlevel = result[0].yearlevel
     student.sessions = result[0].sessions
     console.log(student)
+  }
 }
 </script>
 
@@ -41,7 +46,7 @@ const handleSearch = async () => {
     <form @submit.prevent="handleSearch">
       <div class="mb-4">
         <label for="idno" class="block text-gray-700 font-bold mb-2">ID Number:</label>
-        <input id="idno" v-model="idno" class="input"></input>
+        <input id="idno" v-model="idno" class="input" required></input>
       </div>
       <button
         type="submit"

@@ -93,10 +93,11 @@ router.post("/", (req, res) => {
   );
 });
 
-router.post('/session/:id', (req, res) => {
+router.put('/session/:id', (req, res) => {
   const id = req.params.id;
   connection.query("UPDATE student SET sessions = sessions-1 WHERE idno = ?", [id], (err, rows, fields) => {
     if (err) throw err;
+    res.json(rows);
 })
 })
 

@@ -5,7 +5,7 @@ export const getStudents = async () => {
     return response.data;
 }
 
-export const getStudent = async (id: number) => {
+export const getStudent = async (id: string) => {
     const response = await axios.get(`http://localhost:3000/student/id/${id}`);
     return response.data;
 }
@@ -30,6 +30,6 @@ export const updateStudent = async(student: {firstname:String, middlename:String
 }
 
 export const updateSession = async(id: Number) => {
-    const response = await axios.post(`http://localhost:3000/student/session/${id}`);
+    const response = await axios.put(`http://localhost:3000/student/session/${id}`);
     return response.data;
 }

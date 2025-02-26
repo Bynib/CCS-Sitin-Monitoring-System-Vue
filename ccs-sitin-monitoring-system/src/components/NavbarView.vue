@@ -52,6 +52,9 @@ const goToSearch = () => {
 const gotoStudents = () => {
   router.push('/students')
 }
+const gotoSitins = () => {
+  router.push('/sitins')
+}
 
 const handleLogout = () => {
   // updateSession(userDetail.idno);
@@ -75,6 +78,7 @@ const handleLogout = () => {
   <SearchModalView
   v-if="state.showModal"
   class="fixed flex flex-col justify-center items-center bg-gray-800 p-4 rounded drop-shadow z-50"
+  @click.self="state.showModal = false"
   />
   <div class="flex justify-between fixed w-screen p-5">
     <div class="flex justify-between w-screen">
@@ -83,7 +87,7 @@ const handleLogout = () => {
         alt="CCS"
         width="80"
         class="cursor-pointer"
-        onclick="window.location.href = '/dashboard'"
+        @click="String(studentStore.student.isAdmin)=== '1' ? gotoHome() :  goToAnnouncement()"
       />
       <div v-if="String(studentStore.student.isAdmin) === '1'" class="flex items-center gap-5 pr-2">
         <button
@@ -103,7 +107,13 @@ const handleLogout = () => {
         >
           Search
         </button>
-        
+        <button
+        @click="gotoSitins"
+          :class="
+            route.path === '/sitins' ? 'normalButton border-b-2 border-b-yellow-300' : 'normalButton'
+          "
+          class="normalButton"
+        >Sitin</button>
         <button
           @click="gotoStudents"
           :class="

@@ -11,6 +11,7 @@ import ReservationView from '@/views/student/ReservationView.vue';
 import AdminHome from '@/views/admin/HomeView.vue';
 import Students from '@/views/admin/StudentsView.vue';
 import AddAnnouncementModal from '@/components/AddAnnouncementModalView.vue';
+import SitinView from '@/views/admin/SitinView.vue';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -74,6 +75,11 @@ const router = createRouter({
       path: '/add-announcement',
       name: 'add-announcement',
       component: AddAnnouncementModal
+    },
+    {
+      path: '/sitins',
+      name: 'sitins',
+      component: SitinView
     }
   ],
 })
