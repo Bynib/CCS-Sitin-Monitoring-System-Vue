@@ -108,13 +108,6 @@ const handleLogout = () => {
           Search
         </button>
         <button
-        @click="gotoSitins"
-          :class="
-            route.path === '/sitins' ? 'normalButton border-b-2 border-b-yellow-300' : 'normalButton'
-          "
-          class="normalButton"
-        >Sitin</button>
-        <button
           @click="gotoStudents"
           :class="
             route.path === '/students' ? 'normalButton border-b-2 border-b-yellow-300' : 'normalButton'
@@ -123,6 +116,13 @@ const handleLogout = () => {
         >
           Students
         </button>
+        <button
+        @click="gotoSitins"
+          :class="
+            route.path === '/sitins' ? 'normalButton border-b-2 border-b-yellow-300' : 'normalButton'
+          "
+          class="normalButton"
+        >Sitin</button>
         <button
           @click="handleLogout"
           class="font-bold text-white bg-red-500 hover:bg-red-600 rounded p-2 transition-colors duration-400"
