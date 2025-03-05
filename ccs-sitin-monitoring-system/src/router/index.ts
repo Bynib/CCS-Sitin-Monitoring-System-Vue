@@ -12,6 +12,8 @@ import AdminHome from '@/views/admin/HomeView.vue';
 import Students from '@/views/admin/StudentsView.vue';
 import AddAnnouncementModal from '@/components/AddAnnouncementModalView.vue';
 import SitinView from '@/views/admin/SitinView.vue';
+import RecordView from '@/views/admin/RecordView.vue';
+import FeedbackModalView from '@/components/FeedbackModalView.vue';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -80,6 +82,16 @@ const router = createRouter({
       path: '/sitins',
       name: 'sitins',
       component: SitinView
+    },
+    {
+      path: '/records',
+      name: 'records',
+      component: RecordView
+    },
+    {
+      path: '/feedback',
+      name: 'feedback',
+      component: FeedbackModalView
     }
   ],
 })

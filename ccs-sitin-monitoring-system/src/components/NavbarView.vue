@@ -4,6 +4,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { useStudentStore } from '@/stores/student.store'
 import { updateSession } from '../../api/student'
 import  SearchModalView from '@/components/SearchModalView.vue'
+import OpacityView from './OpacityView.vue'
 
 const state = reactive({
   showModal: false,
@@ -55,6 +56,9 @@ const gotoStudents = () => {
 const gotoSitins = () => {
   router.push('/sitins')
 }
+const gotoRecords = () => {
+  router.push('/records')
+}
 
 const handleLogout = () => {
   // updateSession(userDetail.idno);
@@ -72,13 +76,15 @@ const handleLogout = () => {
   })
   window.location.href = '/'
 }
+
 </script>
 
 <template>
+  <OpacityView v-if="state.showModal" @click="state.showModal = false"></OpacityView>
   <SearchModalView
   v-if="state.showModal"
+  @close="state.showModal = false"
   class="fixed flex flex-col justify-center items-center bg-gray-800 p-4 rounded drop-shadow z-50"
-  @click.self="state.showModal = false"
   />
   <div class="flex justify-between fixed w-screen p-5">
     <div class="flex justify-between w-screen">
@@ -123,6 +129,13 @@ const handleLogout = () => {
           "
           class="normalButton"
         >Sitin</button>
+        <button
+        @click="gotoRecords"
+          :class="
+            route.path === '/records' ? 'normalButton border-b-2 border-b-yellow-300' : 'normalButton'
+          "
+          class="normalButton"
+        >View Sitin Records</button>
         <button
           @click="handleLogout"
           class="font-bold text-white bg-red-500 hover:bg-red-600 rounded p-2 transition-colors duration-400"

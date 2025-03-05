@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { getSitin, removeSitin } from '../../../api/sitin'
+import { getSitin, updateSitinTime } from '../../../api/sitin'
 import { updateSession } from '../../../api/student'
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
@@ -17,21 +17,21 @@ interface Sitin {
   purpose: string
   laboratory: Number
   date: string
+  LoggedOut: string
 }
 
 const sitins = ref<Sitin[]>([])
 
 onMounted(async () => {
-  sitins.value = await getSitin()
+  sitins.value = (await getSitin()).filter((sitin: Sitin) => sitin.LoggedOut === null).sort((a: Sitin, b: Sitin) => new Date(b.date).getTime() - new Date(a.date).getTime())
 })
 
 const handleSitinLogout = async (sitin_id: number, idno: number) => {
     console.log("hello")
     const result = await updateSession(idno)
-
     console.log(result)
-    const result2 = await removeSitin(sitin_id)
-    sitins.value = await getSitin()
+    const result2 = await updateSitinTime(sitin_id)
+    sitins.value = (await getSitin()).filter((sitin: Sitin) => sitin.LoggedOut === null)
     console.log(result2)
 }
 </script>
@@ -48,7 +48,7 @@ const handleSitinLogout = async (sitin_id: number, idno: number) => {
             <th>Year Level</th>
             <th>Purpose</th>
             <th>Laboratory</th>
-            <th>Date & Time</th>
+            <th>Time In</th>
             <th>Actions</th>
           </tr>
         </thead>

@@ -1,9 +1,14 @@
 <script setup lang="ts">
-import { ref, reactive } from 'vue'
+import { ref, reactive, defineEmits } from 'vue'
 import { getStudent } from '../../api/student'
+import { useRouter } from 'vue-router'
 import SitinStudentModalView from '@/components/SitinStudentModalView.vue'
+import OpacityView from './OpacityView.vue'
 
 const openSitinModal = ref(false)
+const router = useRouter()
+
+const emit = defineEmits(['close'])
 
 const idno = ref('')
 const student = reactive({
@@ -34,27 +39,53 @@ const handleSearch = async () => {
     student.yearlevel = result[0].yearlevel
     student.sessions = result[0].sessions
     console.log(student)
+    
   }
 }
+const handleCancel = () => {
+  // window.location.reload();
+  // router.go(0)
+  emit('close')
+}
+const handleCloseModals = ()=>{
+  handleCancel()
+  openSitinModal.value=false
+}
+// const handleRefreshSitins = ()=>{
+//   emit('refreshSitins')
+// }
 </script>
 
 <template>
+  <OpacityView v-if="openSitinModal" @click="openSitinModal = false"></OpacityView>
+  <SitinStudentModalView v-if="openSitinModal===true" 
+  @close="handleCloseModals" 
+  :student="student" class=""/>
   <div
-    class="absolute top-1/3 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-gray-800 p-4 rounded drop-shadow z-50"
+    class="absolute top-1/3 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-gray-800 w-1/4 gap-5 text-white p-10 rounded drop-shadow z-51 flex flex-col"
   >
     <h2 class="text-2xl font-bold">Search Student</h2>
     <form @submit.prevent="handleSearch">
-      <div class="mb-4">
-        <label for="idno" class="block text-gray-700 font-bold mb-2">ID Number:</label>
-        <input id="idno" v-model="idno" class="input" required></input>
+      <div class="mb-4 flex gap-5 justify-between">
+        <label for="idno" class="font-thin">ID Number:</label>
+        <input id="idno" v-model="idno" class="input w-full" required></input>
       </div>
-      <button
-        type="submit"
-        class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded transition-colors duration-400"
-      >
-        Search
-      </button>
+      <div class="flex items-center">
+
+        <button
+          type="button"
+          class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded transition-colors duration-400"
+          @click="handleCancel"
+          >
+          Cancel
+        </button>
+        <button
+          type="submit"
+          class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded transition-colors duration-400"
+        >
+          Search
+        </button>
+      </div>
     </form>
   </div>
-  <SitinStudentModalView v-if="openSitinModal===true" :student="student"/>
 </template>

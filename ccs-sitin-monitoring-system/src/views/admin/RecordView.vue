@@ -1,14 +1,6 @@
 <script setup lang="ts">
-import { ref, onMounted, reactive } from 'vue'
-import { getSitin, findSitin } from '../../../api/sitin'
-import FeedbackModalView from '@/components/FeedbackModalView.vue'
-import { useStudentStore } from '@/stores/student.store'
-
-const studentStore = useStudentStore()
-const openFeedbackModal = ref(false)
-const id = reactive({
-  sitin_id: 0,
-})
+import { ref, onMounted } from 'vue'
+import { getSitin } from '../../../api/sitin'
 interface Sitin {
   sitin_id: Number
   idno: Number
@@ -21,34 +13,18 @@ interface Sitin {
   laboratory: Number
   date: string
   LoggedOut: string
-  feedback: string
 }
 
 const sitins = ref<Sitin[]>([])
 
 onMounted(async () => {
-  sitins.value = (await getSitin()).filter(
-    (sitin: Sitin) => sitin.LoggedOut !== null && sitin.idno === Number(studentStore.student.idNo),
-  )
-  console.log(studentStore.student.idNo)
+  sitins.value = (await getSitin()).filter((sitin: Sitin) => sitin.LoggedOut !== null)
 })
-
-const handleButtonClick = async (sitin_id: number) => {
-  console.log(sitin_id)
-  openFeedbackModal.value = true
-  id.sitin_id = sitin_id
-  console.log("feedback:", sitins.value[0].feedback)
-}
 </script>
 
 <template>
-  <FeedbackModalView
-    v-if="openFeedbackModal === true"
-    class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-gray-800 p-4 rounded drop-shadow z-50"
-    :sitin_id="id.sitin_id"
-  ></FeedbackModalView>
   <div class="flex flex-col items-center justify-center h-screen w-screen text-white">
-    <!-- <div class="font-bold text-3xl mt-10 mb-10"></div> -->
+    <div class="font-bold text-3xl mt-10 mb-10">Records</div>
     <div v-if="sitins.length > 0" class="w-7/10 h-3/4 overflow-scroll flex flex-col">
       <table class="table-auto">
         <thead>
@@ -61,7 +37,6 @@ const handleButtonClick = async (sitin_id: number) => {
             <th>Laboratory</th>
             <th>Time In</th>
             <th>Time Out</th>
-            <th>Feedback</th>
           </tr>
         </thead>
         <tbody>
@@ -81,23 +56,21 @@ const handleButtonClick = async (sitin_id: number) => {
               {{ new Date(sitin.date).toLocaleTimeString() }}
             </td>
             <td>
-              {{ new Date(sitin.LoggedOut).toLocaleDateString() }}
-              {{ new Date(sitin.LoggedOut).toLocaleTimeString() }}
+                {{ new Date(sitin.LoggedOut).toLocaleDateString() }}
+                {{ new Date(sitin.LoggedOut).toLocaleTimeString() }}
             </td>
             <td>
-              <button
-                :disabled="sitin.feedback !== null"
-                :class="sitin.feedback === null ? 'bg-violet-700 hover:bg-violet-900 text-white font-bold py-2 px-4 rounded transition-colors duration-400' : ' py-2 px-4 rounded cursor-no text-gray-500'"
-                  
-                @click="handleButtonClick(Number(sitin.sitin_id))"
+              <!-- <button
+                class="bg-violet-700 hover:bg-violet-900 text-white font-bold py-2 px-4 rounded transition-colors duration-400"
+                @click="handleSitinLogout(Number(sitin.sitin_id), Number(sitin.idno))"
               >
-              {{ sitin.feedback !== null ? 'Done' : 'Send' }}
-              </button>
+                Logout
+              </button> -->
             </td>
           </tr>
         </tbody>
       </table>
     </div>
-    <div v-else>No sitin history...</div>
+    <div v-else>No record...</div>
   </div>
 </template>

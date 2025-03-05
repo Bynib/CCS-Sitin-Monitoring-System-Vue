@@ -1,8 +1,12 @@
 <script setup lang="ts">
 import { addSitin } from '../../api/sitin'
-import { ref } from 'vue'
+import { ref, defineEmits, onBeforeMount, onMounted, computed } from 'vue'
 
-const idno = ref('')
+import { findSitin } from '../../api/sitin'
+
+const emit = defineEmits(['close'])
+
+// const idno = ref('')
 const purpose = ref('')
 const laboratory = ref('')
 
@@ -20,24 +24,54 @@ const props = defineProps<{
   student: Student
 }>()
 
+interface Sitin {
+  sitin_id: number
+  idno: string
+  purpose: string
+  laboratory: string
+  date: string
+  loggedout: string
+}
+
+const sitins = ref<Sitin[]>([])
+
+onMounted(async()=>{
+  console.log(props.student.idno)
+  sitins.value = await findSitin(props.student.idno)
+  console.log("Values",sitins.value)
+})
+
+console.log("Values 2",sitins.value)
+
 const handleSitin = async () => {
-  const student = {
-    idno: Number(props.student.idno),
-    purpose: purpose.value,
-    laboratory: Number(laboratory.value)
+  if (sitins.value[0].loggedout === undefined) {
+    alert('You are already logged in')
+  } else {
+    const student = {
+      idno: Number(props.student.idno),
+      purpose: purpose.value,
+      laboratory: Number(laboratory.value)
+    }
+    
+    const result = await addSitin(student)
+    purpose.value = ''
+    laboratory.value = ''
+    console.log(result)
+    console.log(props.student.idno)
+    alert("student sitin added")
+    window.location.reload()
   }
   
-  const result = await addSitin(student)
-  console.log(result)
-  console.log(props.student.idno)
-  alert("student sitin added")
   
+}
+const handleCancel = () => {
+  emit('close') // Go back to the previous page
 }
 </script>
 
 <template>
   <div
-    class="text-white flex flex-col w-2/7 absolute top-1/2 left-1/2 p-10 transform -translate-x-1/2 -translate-y-1/2 bg-gray-800  rounded drop-shadow z-50"
+    class="text-white flex flex-col w-2/7 absolute top-1/2 left-1/2 p-10 transform -translate-x-1/2 -translate-y-1/2 bg-gray-800  rounded drop-shadow z-60"
   >
     <h2 class="text-2xl font-bold">Student Details</h2>
     <div class="bg-white h-0.5 mt-3 mb-3"></div>
@@ -85,7 +119,9 @@ const handleSitin = async () => {
         Sitin
       </button>
       <button
+      type="button"
       class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded transition-colors duration-400"
+      @click="handleCancel"
       >
         Cancel
       </button>
