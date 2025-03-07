@@ -3,6 +3,7 @@ import { addSitin } from '../../api/sitin'
 import { ref, defineEmits, onBeforeMount, onMounted, computed } from 'vue'
 
 import { findSitin } from '../../api/sitin'
+import StudentsView from '@/views/admin/StudentsView.vue'
 
 const emit = defineEmits(['close'])
 
@@ -35,6 +36,8 @@ interface Sitin {
 
 const sitins = ref<Sitin[]>([])
 
+const isDisabled = ref(false)
+
 onMounted(async()=>{
   console.log(props.student.idno)
   sitins.value = await findSitin(props.student.idno)
@@ -42,28 +45,33 @@ onMounted(async()=>{
 })
 
 console.log("Values 2",sitins.value)
-
 const handleSitin = async () => {
-  if (sitins.value[0].loggedout === undefined) {
-    alert('You are already logged in')
-  } else {
-    const student = {
-      idno: Number(props.student.idno),
-      purpose: purpose.value,
-      laboratory: Number(laboratory.value)
+  const student = {
+    idno: Number(props.student.idno),
+    purpose: purpose.value,
+    laboratory: Number(laboratory.value)
+  };
+
+  try {
+    const result = await addSitin(student);
+    if(!result.success){
+      // alert('Student is currently sitting in and has not logged out!');
+      // window.location.reload()
+      isDisabled.value = true;
+      console.log(isDisabled)
+      return;
     }
-    
-    const result = await addSitin(student)
-    purpose.value = ''
-    laboratory.value = ''
-    console.log(result)
-    console.log(props.student.idno)
-    alert("student sitin added")
+    purpose.value = '';
+    laboratory.value = '';
+    alert('Student sitin added successfully');
     window.location.reload()
+    // sitins.value = await findSitin(props.student.idno); // Refresh the data
+  } catch (error) {
+    console.error("Error adding sitin:", error);
+    alert('Failed to add sitin');
   }
-  
-  
-}
+};
+
 const handleCancel = () => {
   emit('close') // Go back to the previous page
 }
@@ -71,7 +79,7 @@ const handleCancel = () => {
 
 <template>
   <div
-    class="text-white flex flex-col w-2/7 absolute top-1/2 left-1/2 p-10 transform -translate-x-1/2 -translate-y-1/2 bg-gray-800  rounded drop-shadow z-60"
+    class="border-2 border-green-500 text-white flex flex-col w-2/7 absolute top-1/2 left-1/2 p-10 transform -translate-x-1/2 -translate-y-1/2 bg-gray-800  rounded drop-shadow z-60"
   >
     <h2 class="text-2xl font-bold">Student Details</h2>
     <div class="bg-white h-0.5 mt-3 mb-3"></div>
@@ -114,9 +122,11 @@ const handleCancel = () => {
       <div class=" w-20/22 flex flex-col justify-between gap-5">
         <button
         type="submit"
-        class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded transition-colors duration-400"
+        :class="isDisabled ? 'bg-gray-500 text-white font-bold py-2 px-4 rounded':'bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded transition-colors duration-400'"
+        :disabled="isDisabled"
         >
-        Sitin
+        {{ isDisabled ? 'Student has not been logged out of another sitin...':'Sitin' }}
+        <!-- Sitin -->
       </button>
       <button
       type="button"

@@ -62,15 +62,15 @@ const handleCloseModals = ()=>{
   @close="handleCloseModals" 
   :student="student" class=""/>
   <div
-    class="absolute top-1/3 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-gray-800 w-1/4 gap-5 text-white p-10 rounded drop-shadow z-51 flex flex-col"
+    class="border-2 border-green-500 absolute top-2/5 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-gray-800 w-1/4 gap-5 text-white p-10 rounded z-51 flex flex-col"
   >
-    <h2 class="text-2xl font-bold">Search Student</h2>
+    <h2 class="text-2xl font-bold text-violet-400">Search Student</h2>
     <form @submit.prevent="handleSearch">
       <div class="mb-4 flex gap-5 justify-between">
-        <label for="idno" class="font-thin">ID Number:</label>
+        <label for="idno" class="font-thin w-1/3">ID Number:</label>
         <input id="idno" v-model="idno" class="input w-full" required></input>
       </div>
-      <div class="flex items-center">
+      <div class="flex flex-row justify-end gap-5">
 
         <button
           type="button"

@@ -47,30 +47,33 @@ const handleClose = () => {
 </script>
 
 <template>
-    <div>
-    <h2 class="text-2xl font-bold">Edit Announcement</h2>
+    <div class="border-2 border-green-500 w-1/4 gap-5 text-white p-10 rounded bg-gray-900 drop-shadow z-50 flex flex-col">
+    <h2 class="text-2xl font-bold text-violet-400">Edit Announcement</h2>
     <form @submit.prevent="handleEdit()">
       <div class="mb-4">
         <label for="title" class="block text-gray-700 font-bold mb-2">Title:</label>
-        <input type="text" id="title" v-model="title" class="input"  required />
+        <input type="text" id="title" v-model="title" class="input w-full"  required />
       </div>
       <div class="mb-4">
         <label for="content" class="block text-gray-700 font-bold mb-2">Content:</label>
-        <textarea id="content" v-model="content" class="input" required ></textarea>
+        <textarea id="content" v-model="content" class="input w-full" required ></textarea>
       </div>
-      <button
+      <div class="flex flex-row justify-end gap-5">
+
+        <button
         type="button"
-        class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded transition-colors duration-400"
+        class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded transition-colors duration-400"
         @click="handleClose"
         >
         Cancel
       </button>
       <button
-        type="submit"
-        class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded transition-colors duration-400"
-        >
-        Edit
-      </button>
+      type="submit"
+      class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded transition-colors duration-400"
+      >
+      Edit
+    </button>
+  </div>
     </form>
   </div>
 </template>

@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { getSitin } from '../../../api/sitin'
+import { Pie } from 'vue-chartjs'
+
 interface Sitin {
   sitin_id: Number
   idno: Number
@@ -17,14 +19,41 @@ interface Sitin {
 
 const sitins = ref<Sitin[]>([])
 
+const chartData = ref({
+  labels: ['Label 1','Label 2','Label 3'],
+  datasets: [{
+    label: 'Dataset 1',
+    data: [10,20,30],
+    backgroundColor: [
+      'rgba(255,99,132,0.2)',
+      'rgba(54, 162, 235, 0.2)',
+      'rgba(255, 206, 86, 0.2)'
+    ],
+    borderColor: [
+      'rgba(255, 99, 132, 1)',
+      'rgba(54, 162, 235, 1)',
+      'rgba(255, 206, 86, 1)'
+    ],
+    borderWidth: 1
+  }]
+})
+const chartOptions = ref({
+  responsive: true,
+  maintainAspectRatio: false
+})
+
 onMounted(async () => {
   sitins.value = (await getSitin()).filter((sitin: Sitin) => sitin.LoggedOut !== null)
+  chartData.value.labels =  ['Label 1', 'Label 2', 'Label 3']
+  chartData.value.datasets[0].data = [10, 20, 30]
+  
 })
 </script>
 
 <template>
-  <div class="flex flex-col items-center justify-center h-screen w-screen text-white">
-    <div class="font-bold text-3xl mt-10 mb-10">Records</div>
+  <div class="flex flex-col items-center h-screen w-screen text-white">
+    <!-- <pie-chart :chart-data="chartData" :options="chartOptions" class="w-full h-64 mx-auto"></pie-chart> -->
+    <div class="font-bold text-3xl mt-30 mb-12">Records</div>
     <div v-if="sitins.length > 0" class="w-7/10 h-3/4 overflow-scroll flex flex-col">
       <table class="table-auto">
         <thead>

@@ -62,10 +62,10 @@ const handleSubmitEdit = () => {
 
 <template>
   <div
-    class="flex flex-col items-center justify-center h-screen w-screen pt-20 gap-3 text-gray-300"
+    class="flex flex-col items-center  h-screen w-screen pt-20 gap-3 text-gray-300"
   >
     <!-- <div class="font-extrabold text-[clamp(2rem,5vw,3rem)]">Student Profile</div> -->
-    <div class="flex flex-row items-center justify-center w-screen text-gray-300 gap-10">
+    <div class="flex flex-row items-center justify-center mt-20 w-screen text-gray-300 gap-10">
       <div class="mb-40 flex flex-col items-center gap-5" style="width: 15rem; height: 15rem">
         <img
           src="@/assets/avatar.jpeg"

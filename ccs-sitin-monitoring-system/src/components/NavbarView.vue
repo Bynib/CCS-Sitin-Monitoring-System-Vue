@@ -15,6 +15,7 @@ console.log(studentStore.student.username)
 const userDetail = reactive({
   idno: Number(studentStore.student.idNo),
 })
+console.log(studentStore.student.firstName)
 
 const route = useRoute()
 const router = useRouter()
@@ -88,13 +89,17 @@ const handleLogout = () => {
   />
   <div class="flex justify-between fixed w-screen p-5">
     <div class="flex justify-between w-screen">
-      <img
+      <div class="flex flex-row gap-10">
+        
+        <img
         src="@/assets/CCS_LOGO.png"
         alt="CCS"
         width="80"
         class="cursor-pointer"
         @click="String(studentStore.student.isAdmin)=== '1' ? gotoHome() :  goToAnnouncement()"
-      />
+        />
+        <div class="text-yellow-500 flex items-center text-3xl font-bold "> WELCOME, {{ studentStore.student.firstName }}!</div>
+      </div>
       <div v-if="String(studentStore.student.isAdmin) === '1'" class="flex items-center gap-5 pr-2">
         <button
           @click="gotoHome"

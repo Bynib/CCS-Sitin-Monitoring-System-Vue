@@ -60,10 +60,15 @@ const handleRefreshAnnouncements = async () => {
   announcements.value = (await getAnnouncements()).sort((a: Announcement, b: Announcement) => new Date(b.announcement_date).getTime() - new Date(a.announcement_date).getTime())
   console.log('Fetched Announcements:', announcements.value)
 }
+
+const opacityViewOff = async () =>{
+  openModal.value = false
+  openUpdateModal.value = false
+}
 </script>
 
 <template>
-  <OpacityView v-if="openModal || openUpdateModal" @click="openModal = false"></OpacityView>
+  <OpacityView v-if="openModal || openUpdateModal" @click="opacityViewOff"></OpacityView>
   <AddAnnouncementModalView
     v-if="openModal"
     @close="openModal = false"

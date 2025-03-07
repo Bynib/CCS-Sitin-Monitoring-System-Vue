@@ -32,17 +32,19 @@ const handleCancel = () => {
 
 <template>
   <div class="w-1/4 gap-5 text-white p-10 rounded bg-gray-900 drop-shadow z-50 flex flex-col">
-    <h2 class="text-2xl font-bold">Create Announcement</h2>
+    <h2 class="text-2xl font-bold text-violet-400">Create Announcement</h2>
     <form @submit.prevent="createAnnouncement">
       <div class="mb-4">
-        <label for="title" class="block text-gray-700 font-bold mb-2">Title:</label>
-        <input type="text" id="title" v-model="title" class="input" required />
+        <label for="title" class="block text-white font-bold mb-2">Title:</label>
+        <input type="text" id="title" v-model="title" class="input w-full" required />
       </div>
       <div class="mb-4">
-        <label for="content" class="block text-gray-700 font-bold mb-2">Content:</label>
-        <textarea id="content" v-model="content" class="input" required></textarea>
+        <label for="content" class="block text-white font-bold mb-2">Content:</label>
+        <textarea id="content" v-model="content" class="input w-full" required></textarea>
       </div>
-      <button
+      <div class="flex flex-row justify-end gap-5">
+
+        <button
         type="button"
         class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded transition-colors duration-400"
         @click="handleCancel"
@@ -52,9 +54,10 @@ const handleCancel = () => {
       <button
         type="submit"
         class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded transition-colors duration-400"
-      >
+        >
         Create
       </button>
+    </div>
     </form>
   </div>
 </template>
