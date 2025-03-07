@@ -24,7 +24,6 @@ interface Student {
 const props = defineProps<{
   student: Student
 }>()
-
 interface Sitin {
   sitin_id: number
   idno: string
@@ -86,6 +85,7 @@ const handleCancel = () => {
     <form @submit.prevent="handleSitin" class="flex flex-col items-center">
       <div class="mb-4 w-14/15 flex flex-col">
         <div class="flex flex-row justify-between p-2">
+          <!-- <div v-if="props.student.firstname = ''"> null</div> -->
           <p class="font-bold mb-2">ID Number:</p>
           <p class="font-bold mb-2" ref="idno">{{ student.idno }}</p>
         </div>
@@ -111,6 +111,7 @@ const handleCancel = () => {
           <label for="laboratory" class="">Laboratory:</label>
           <select name="laboratory" id="laboratory" class="select w-3/5" v-model="laboratory" required>
             <option value="524" class="option">524</option>
+            <option value="524" class="option">526</option>
             <option value="528" class="option">528</option>
             <option value="530" class="option">530</option>
             <option value="542" class="option">542</option>

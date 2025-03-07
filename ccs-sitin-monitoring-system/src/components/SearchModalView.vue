@@ -6,6 +6,7 @@ import SitinStudentModalView from '@/components/SitinStudentModalView.vue'
 import OpacityView from './OpacityView.vue'
 
 const openSitinModal = ref(false)
+const isSearchModalOpen = ref(true)
 const router = useRouter()
 
 const emit = defineEmits(['close'])
@@ -24,21 +25,34 @@ const student = reactive({
 
 
 const handleSearch = async () => {
-  if (!idno.value){
+  if (!idno.value ){
     alert("please provide IDNo")
   } else {
 
-    openSitinModal.value = true
+    if (isNaN(Number(idno.value))) {
+    alert("ID Number must be a number");
+    return;
+  }
+    
     const result = await getStudent(idno.value)
-    student.idno = result[0].idno
-    student.firstname = result[0].firstname
-    student.middlename = result[0].middlename
-    student.lastname = result[0].lastname
-    student.email = result[0].email
-    student.course = result[0].course
-    student.yearlevel = result[0].yearlevel
-    student.sessions = result[0].sessions
-    console.log(student)
+    console.log(result)
+    if (result.length !=0) {
+      
+      student.idno = result[0].idno
+      student.firstname = result[0].firstname
+      student.middlename = result[0].middlename
+      student.lastname = result[0].lastname
+      student.email = result[0].email
+      student.course = result[0].course
+      student.yearlevel = result[0].yearlevel
+      student.sessions = result[0].sessions
+
+      isSearchModalOpen.value = false
+      openSitinModal.value = true
+      console.log(student)
+    } else{
+      alert("Student not found...")
+    }
     
   }
 }
@@ -62,6 +76,7 @@ const handleCloseModals = ()=>{
   @close="handleCloseModals" 
   :student="student" class=""/>
   <div
+  v-if="isSearchModalOpen"
     class="border-2 border-green-500 absolute top-2/5 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-gray-800 w-1/4 gap-5 text-white p-10 rounded z-51 flex flex-col"
   >
     <h2 class="text-2xl font-bold text-violet-400">Search Student</h2>

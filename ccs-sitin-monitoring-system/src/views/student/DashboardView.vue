@@ -13,7 +13,7 @@ const announcements = ref<Announcement[]>([])
 
 onMounted(async () => {
   try {
-    announcements.value = await getAnnouncements()
+    announcements.value =(await getAnnouncements()).sort((a: Announcement, b: Announcement) => new Date(b.announcement_date).getTime() - new Date(a.announcement_date).getTime())
     console.log("Fetched Announcements:", announcements.value)
   } catch (error) {
     console.error("Error fetching announcements:", error)

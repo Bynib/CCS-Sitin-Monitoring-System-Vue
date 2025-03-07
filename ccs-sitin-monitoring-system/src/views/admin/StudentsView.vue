@@ -10,6 +10,7 @@ interface Student {
   email: string
   course: string
   yearlevel: string
+  sessions: string
 }
 
 const students = ref<Student[]>([])
@@ -35,6 +36,7 @@ onMounted(async () => {
             <th>Email</th>
             <th>Course</th>
             <th>Year Level</th>
+            <th>Remaining <br>Sessions</th>
           </tr>
         </thead>
         <tbody>
@@ -50,6 +52,7 @@ onMounted(async () => {
               <td>{{ student.email }}</td>
               <td>{{ student.course }}</td>
               <td>{{ student.yearlevel }}</td>
+              <td>{{ student.sessions }}</td>
             </tr>
           </tbody>
         </table>
