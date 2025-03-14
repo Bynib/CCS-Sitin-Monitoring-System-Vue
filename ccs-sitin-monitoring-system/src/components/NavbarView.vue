@@ -60,6 +60,9 @@ const gotoSitins = () => {
 const gotoRecords = () => {
   router.push('/records')
 }
+const gotoFeedbacks = () =>{
+  router.push('/feedbacks')
+}
 
 const handleLogout = () => {
   // updateSession(userDetail.idno);
@@ -141,6 +144,13 @@ const handleLogout = () => {
           "
           class="normalButton"
         >View Sitin Records</button>
+        <button
+        @click="gotoFeedbacks"
+          :class="
+            route.path === '/feedbacks' ? 'normalButton border-b-2 border-b-yellow-300' : 'normalButton'
+          "
+          class="normalButton"
+        >Feedbacks</button>
         <button
           @click="handleLogout"
           class="font-bold text-white bg-red-500 hover:bg-red-600 rounded p-2 transition-colors duration-400"

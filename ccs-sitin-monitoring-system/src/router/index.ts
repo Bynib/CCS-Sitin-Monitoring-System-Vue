@@ -14,6 +14,7 @@ import AddAnnouncementModal from '@/components/AddAnnouncementModalView.vue';
 import SitinView from '@/views/admin/SitinView.vue';
 import RecordView from '@/views/admin/RecordView.vue';
 import FeedbackModalView from '@/components/FeedbackModalView.vue';
+import FeedbackView from '@/views/admin/FeedbackView.vue';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -92,6 +93,11 @@ const router = createRouter({
       path: '/feedback',
       name: 'feedback',
       component: FeedbackModalView
+    },
+    {
+      path: '/feedbacks',
+      name: 'feedbacks',
+      component: FeedbackView
     }
   ],
 })

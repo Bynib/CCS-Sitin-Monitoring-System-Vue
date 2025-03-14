@@ -39,6 +39,7 @@ const handleButtonClick = async (sitin_id: number) => {
   id.sitin_id = sitin_id
   console.log("feedback:", sitins.value[0].feedback)
 }
+
 </script>
 
 <template>
@@ -50,7 +51,7 @@ const handleButtonClick = async (sitin_id: number) => {
   <div class="flex flex-col items-center justify-center h-screen w-screen text-white">
     <!-- <div class="font-bold text-3xl mt-10 mb-10"></div> -->
     <div v-if="sitins.length > 0" class="w-7/10 h-3/4 overflow-scroll flex flex-col">
-      <table class="table-auto">
+      <table id="table" name="table" class="table-auto">
         <thead>
           <tr class="sticky top-0 bg-[#181818]">
             <th>ID Number</th>
@@ -87,7 +88,7 @@ const handleButtonClick = async (sitin_id: number) => {
             <td>
               <button
                 :disabled="sitin.feedback !== null"
-                :class="sitin.feedback === null ? 'bg-violet-700 hover:bg-violet-900 text-white font-bold py-2 px-4 rounded transition-colors duration-400' : ' py-2 px-4 rounded cursor-no text-gray-500'"
+                :class="sitin.feedback === null ? 'bg-violet-700 hover:bg-violet-900 text-white font-bold py-2 px-4 rounded transition-colors duration-400' : ' py-2 px-4 rounded cursor-no text-gray-500 cursor-none'"
                   
                 @click="handleButtonClick(Number(sitin.sitin_id))"
               >
