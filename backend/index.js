@@ -3,6 +3,7 @@ import cors from 'cors';
 import studentRoute from './routes/student.route.js';
 import announcementRoute from './routes/announcement.route.js';
 import sitinRoute from './routes/sitin.route.js';
+import recordRoute from './routes/record.route.js';
 
 const app = express();
 
@@ -11,6 +12,7 @@ app.use(express.json());
 app.use('/student', studentRoute);
 app.use('/announcement', announcementRoute);
 app.use('/sitin', sitinRoute);
+app.use('/record', recordRoute);
 
 const port = process.env.PORT || 3000;
 
