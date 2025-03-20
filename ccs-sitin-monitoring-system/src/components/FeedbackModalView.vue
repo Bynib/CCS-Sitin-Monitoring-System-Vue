@@ -20,7 +20,7 @@ const handleFeedback = async() => {
 </script>
 
 <template>
-    <div>
+    <div class="w-1/4 h-1/3 flex flex-col text-white">
     <h2 class="text-2xl font-bold">Submit Feedback</h2>
     <form @submit.prevent="handleFeedback">
       <div class="mb-4">

@@ -45,7 +45,7 @@ const handleButtonClick = async (sitin_id: number) => {
 <template>
   <FeedbackModalView
     v-if="openFeedbackModal === true"
-    class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-gray-800 p-4 rounded drop-shadow z-50"
+    class="absolute border-2 border-green-500 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-gray-800 p-4 rounded drop-shadow z-50"
     :sitin_id="id.sitin_id"
   ></FeedbackModalView>
   <div class="flex flex-col items-center justify-center h-screen w-screen text-white">
@@ -88,7 +88,7 @@ const handleButtonClick = async (sitin_id: number) => {
             <td>
               <button
                 :disabled="sitin.feedback !== null"
-                :class="sitin.feedback === null ? 'bg-violet-700 hover:bg-violet-900 text-white font-bold py-2 px-4 rounded transition-colors duration-400' : ' py-2 px-4 rounded cursor-no text-gray-500 cursor-none'"
+                :class="sitin.feedback === null ? 'bg-violet-700 hover:bg-violet-900 text-white font-bold py-2 px-4 rounded transition-colors duration-400' : ' py-2 px-4 rounded cursor-none text-gray-500'"
                   
                 @click="handleButtonClick(Number(sitin.sitin_id))"
               >
