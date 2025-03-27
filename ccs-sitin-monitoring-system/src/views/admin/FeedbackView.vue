@@ -25,15 +25,30 @@ interface Sitin {
 }
 
 const filteredSitins = computed(() => {
-  return laboratory.value === 'all' ? sitins.value : sitins.value.filter(s => s.laboratory === laboratory.value);
+  console.log("Selected lab:", laboratory.value);
+  console.log("Available sitins:", sitins.value);
+
+  if (laboratory.value === 'all' || laboratory.value === '') {
+    return sitins.value;
+  } else {
+    return sitins.value.filter(s => {
+      console.log("Comparing:", s.laboratory, "with", laboratory.value);
+      console.log(String(s.laboratory) === String(laboratory.value))
+      return String(s.laboratory) === String(laboratory.value);
+    });
+  }
 });
 
+
 const exportData = (format: 'pdf' | 'csv' | 'xlsx') => {
+  console.log(laboratory.value)
+
   if (!laboratory.value) {
     alert('Please select a laboratory');
     return;
   }
 
+  console.log(filteredSitins.value)
   if (filteredSitins.value.length === 0) {
     alert(`No records found for Laboratory ${laboratory.value}`);
     return;
@@ -52,13 +67,13 @@ const exportData = (format: 'pdf' | 'csv' | 'xlsx') => {
   ]);
 
   const headers = ['ID Number', 'Name', 'Course', 'Year Level', 'Purpose', 'Laboratory', 'Time In', 'Time Out', 'Feedback'];
-  const fileName = `sitin-history-${laboratory.value}.`;
+  const fileName = `sitin-feedback-${laboratory.value}.`;
 
   switch (format) {
     case 'pdf':
       const doc = new jsPDF();
       doc.setFont('Times New Roman', 'bold').setFontSize(16);
-      doc.text(`Sit-in History - Laboratory ${laboratory.value}`, 105, 15, { align: 'center' });
+      doc.text(`Sit-in Feedback - Laboratory ${laboratory.value}`, 105, 15, { align: 'center' });
       autoTable(doc, { startY: 25, head: [headers], body: data });
       doc.save(`${fileName}pdf`);
       break;
@@ -80,7 +95,7 @@ const exportData = (format: 'pdf' | 'csv' | 'xlsx') => {
 };
 
 onMounted(async () => {
-  sitins.value = (await getSitin()).filter((s:Sitin) => s.LoggedOut !== null);
+  sitins.value = (await getSitin()).filter((s:Sitin) => s.LoggedOut !== null && s.feedback !== null);
 });
 </script>
 
@@ -116,7 +131,7 @@ onMounted(async () => {
         <tbody>
           <tr v-for="sitin in sitins" :key="sitin.sitin_id" class="bg-gray-800 text-center">
             <td class="p-4">{{ sitin.idno }}</td>
-            <td>{{ sitin.firstname }} {{ sitin.lastname }}</td>
+            <td>{{ sitin.firstname }} {{ sitin.middlename }} {{ sitin.lastname }}</td>
             <td>{{ sitin.course }}</td>
             <td>{{ sitin.yearlevel }}</td>
             <td>{{ sitin.purpose }}</td>

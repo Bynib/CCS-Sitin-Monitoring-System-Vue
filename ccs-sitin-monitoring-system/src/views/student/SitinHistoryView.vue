@@ -3,6 +3,7 @@ import { ref, onMounted, reactive } from 'vue'
 import { getSitin, findSitin } from '../../../api/sitin'
 import FeedbackModalView from '@/components/FeedbackModalView.vue'
 import { useStudentStore } from '@/stores/student.store'
+import OpacityView from '@/components/OpacityView.vue'
 
 const studentStore = useStudentStore()
 const openFeedbackModal = ref(false)
@@ -43,8 +44,10 @@ const handleButtonClick = async (sitin_id: number) => {
 </script>
 
 <template>
+  <OpacityView v-if="openFeedbackModal === true" @click="openFeedbackModal = false"></OpacityView>
   <FeedbackModalView
     v-if="openFeedbackModal === true"
+    @close="openFeedbackModal = false"
     class="absolute border-2 border-green-500 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-gray-800 p-4 rounded drop-shadow z-50"
     :sitin_id="id.sitin_id"
   ></FeedbackModalView>
