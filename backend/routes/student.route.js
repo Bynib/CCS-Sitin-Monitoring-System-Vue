@@ -101,4 +101,11 @@ router.put('/session/:id', (req, res) => {
 })
 })
 
+router.put('/updateall', (req, res) => {
+  connection.query("UPDATE student SET sessions = 30", (err, rows, fields) => {
+    if (err) throw err;
+    res.json(rows);
+  }  )
+})
+
 export default router;

@@ -33,3 +33,8 @@ export const updateSession = async(id: Number) => {
     const response = await axios.put(`http://localhost:3000/student/session/${id}`);
     return response.data;
 }
+
+export const updateAll = async()=>{
+    const response = await axios.put('http://localhost:3000/student/updateall');
+    return response.data;
+}
