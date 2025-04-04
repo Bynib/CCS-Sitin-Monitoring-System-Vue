@@ -34,7 +34,7 @@ const checkFoulWords = (feedback: string) => {
 }
 
 onMounted(async () => {
-  sitins.value = (await getSitin()).filter((s:Sitin) => s.LoggedOut !== null && s.feedback !== null);
+  sitins.value = (await getSitin()).filter((s:Sitin) => s.LoggedOut !== null && s.feedback !== null).reverse();
 
   sitins.value.forEach((sitin: Sitin) => {
     checkFoulWords(sitin.feedback)
@@ -62,16 +62,16 @@ onMounted(async () => {
           </tr>
         </thead>
         <tbody>
-          <tr v-for="sitin in sitins" :key="sitin.sitin_id" class="bg-gray-800 text-center">
-            <td class="p-4">{{ sitin.idno }}</td>
-            <td>{{ sitin.firstname }} {{ sitin.middlename }} {{ sitin.lastname }}</td>
-            <td>{{ sitin.course }}</td>
-            <td>{{ sitin.yearlevel }}</td>
-            <td>{{ sitin.purpose }}</td>
-            <td>{{ sitin.laboratory }}</td>
-            <td>{{ new Date(sitin.date).toLocaleString() }}</td>
-            <td>{{ new Date(sitin.LoggedOut).toLocaleString() }}</td>
-            <td :class="checkFoulWords(sitin.feedback) ? 'bg-red-700' : 'bg-violet-700'">{{ sitin.feedback }}</td>
+          <tr v-for="sitin, index in sitins" :key="sitin.sitin_id" :class=" index % 2 ? '  rounded-lg text-center' : ' bg-gray-800 rounded-lg text-center'">
+            <td class="align-text-top p-5">{{ sitin.idno }}</td>
+            <td class="align-text-top p-5">{{ sitin.firstname }} {{ sitin.middlename }} {{ sitin.lastname }}</td>
+            <td class="align-text-top p-5">{{ sitin.course }}</td>
+            <td class="align-text-top p-5">{{ sitin.yearlevel }}</td>
+            <td class="align-text-top p-5">{{ sitin.purpose }}</td>
+            <td class="align-text-top p-5">{{ sitin.laboratory }}</td>
+            <td class="align-text-top p-5">{{ new Date(sitin.date).toLocaleString() }}</td>
+            <td class="align-text-top p-5">{{ new Date(sitin.LoggedOut).toLocaleString() }}</td>
+            <td :class="checkFoulWords(sitin.feedback) ? 'bg-red-700 text-left p-5' : 'bg-violet-700 text-left p-5 max-w-150'">{{ sitin.feedback }}</td>
           </tr>
         </tbody>
       </table>

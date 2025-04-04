@@ -105,17 +105,15 @@ const handleCancel = () => {
         </div>
         <div class="flex flex-row justify-between p-2">
           <label for="purpose" class="">Purpose:</label>
-          <input id="purpose" type="text" class="input w-3/5" v-model="purpose" required/>
+          <!-- <input id="purpose" type="text" class="input w-3/5" v-model="purpose" required/> -->
+          <select name="purpose" id="purpose" class="select w-3/5" v-model="purpose" required>
+            <option v-for="purpose in ['C Programming', 'Java Programming', 'C# Programming', 'Systems Integration and Architecture', 'Embedded Systems & IoT', 'Digital Logic & Design', 'Computer Application', 'Database', 'Project Management', 'Python Programming', 'Mobile Application', 'Web Design', 'PHP Programming']" :key="purpose" :value="purpose" class="option">{{ purpose }}</option>
+          </select>
         </div>
         <div class="flex flex-row justify-between p-2">
           <label for="laboratory" class="">Laboratory:</label>
           <select name="laboratory" id="laboratory" class="select w-3/5" v-model="laboratory" required>
-            <option value="524" class="option">524</option>
-            <option value="524" class="option">526</option>
-            <option value="528" class="option">528</option>
-            <option value="530" class="option">530</option>
-            <option value="542" class="option">542</option>
-            <option value="544" class="option">544</option>
+            <option v-for="lab in [517,524,526,528,530,542,544]" :key="lab" :value="lab" class="option">{{ lab }}</option>
           </select>
         </div>
         

@@ -30,7 +30,7 @@ const sitins = ref<Sitin[]>([])
 onMounted(async () => {
   sitins.value = (await getSitin()).filter(
     (sitin: Sitin) => sitin.LoggedOut !== null && sitin.idno === Number(studentStore.student.idNo),
-  )
+  ).reverse();
   console.log(studentStore.student.idNo)
 })
 

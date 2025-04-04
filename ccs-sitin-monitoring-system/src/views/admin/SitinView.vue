@@ -28,22 +28,6 @@ onMounted(async () => {
   sitins.value = (await getSitin()).filter((sitin: Sitin) => sitin.LoggedOut === null).sort((a: Sitin, b: Sitin) => new Date(b.date).getTime() - new Date(a.date).getTime())
 })
 
-// const filteredSitins = computed(() => {
-//   if(!searchQuery.value) return sitins.value
-//   return sitins.value.filter((sitin: Sitin) => {
-//     return (
-//       sitin.idno.toString().includes(searchQuery.value) ||
-//       sitin.firstname.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-//       sitin.middlename.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-//       sitin.lastname.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-//       sitin.course.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-//       sitin.yearlevel.toString().includes(searchQuery.value) ||
-//       sitin.purpose.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-//       sitin.laboratory.toString().includes(searchQuery.value) ||
-//       sitin.date.toLowerCase().includes(searchQuery.value.toLowerCase())
-//     )
-//   })
-// })
 
 const handleSitinLogout = async (sitin_id: number, idno: number) => {
     const confirmLogout = confirm("Confirm Student Logout")
