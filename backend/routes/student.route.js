@@ -101,11 +101,20 @@ router.put('/session/:id', (req, res) => {
 })
 })
 
+
 router.put('/updateall', (req, res) => {
   connection.query("UPDATE student SET sessions = 30", (err, rows, fields) => {
     if (err) throw err;
     res.json(rows);
   }  )
+})
+
+router.put('/updatepoint/:id', (req, res) => {
+  const id = req.params.id;
+  connection.query("UPDATE student SET points = points+1 WHERE idno = ?", [id], (err, rows, fields) => {
+    if (err) throw err;
+    res.json(rows);
+})
 })
 
 export default router;

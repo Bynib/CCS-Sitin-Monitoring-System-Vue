@@ -13,13 +13,14 @@ interface Student {
   course: string
   yearlevel: string
   sessions: string
+  points: string
 }
 
 const students = ref<Student[]>([])
 const router = useRouter()
 
 onMounted(async () => {
-  students.value = await getStudents()
+  students.value = (await getStudents()).sort((s: Student, t: Student) => Number(t.points) - Number(s.points))
   console.log("hello")
   console.log(students.value)
 })
@@ -55,6 +56,7 @@ const resetSessions = async()=>{
             <th>Course</th>
             <th>Year Level</th>
             <th>Remaining <br>Sessions</th>
+            <th>Points</th>
           </tr>
         </thead>
         <tbody>
@@ -71,6 +73,7 @@ const resetSessions = async()=>{
               <td>{{ student.course }}</td>
               <td>{{ student.yearlevel }}</td>
               <td>{{ student.sessions }}</td>
+              <td>{{ student.points }}</td>
             </tr>
           </tbody>
         </table>

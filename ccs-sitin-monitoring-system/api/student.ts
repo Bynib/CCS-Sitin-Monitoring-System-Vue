@@ -38,3 +38,8 @@ export const updateAll = async()=>{
     const response = await axios.put('http://localhost:3000/student/updateall');
     return response.data;
 }
+
+export const updatePoint = async(id: Number)=>{
+    const response = await axios.put(`http://localhost:3000/student/updatepoint/${id}`);
+    return response.data;
+}

@@ -1,10 +1,13 @@
 <script setup lang="ts">
+import { getStudent } from '../../../api/student'
 import { getSitin, updateSitinTime } from '../../../api/sitin'
 import { updateSession } from '../../../api/student'
-import { ref, onMounted, computed, watch } from 'vue'
+import { ref, onMounted, computed, reactive } from 'vue'
 import { useRouter } from 'vue-router'
+import LogoutStudentModalView from '@/components/LogoutStudentModalView.vue'
 
 const router = useRouter()
+const openLogoutModal = ref(false)
 
 const searchQuery = ref()
 
@@ -20,15 +23,45 @@ interface Sitin {
   laboratory: Number
   date: string
   LoggedOut: string
+  points: string
 }
 
 const sitins = ref<Sitin[]>([])
+
+const student = reactive({
+    idno: '',
+    firstname: '',
+    middlename: '',
+    lastname: '',
+    email: '',
+    course: '',
+    yearlevel: '',
+    sessions: '',
+    points: ''
+})
+
+const handleCloseModal = ()=>{
+  openLogoutModal.value=false
+}
 
 onMounted(async () => {
   sitins.value = (await getSitin()).filter((sitin: Sitin) => sitin.LoggedOut === null).sort((a: Sitin, b: Sitin) => new Date(b.date).getTime() - new Date(a.date).getTime())
 })
 
-
+const logoutButtonClicked = async(sitin_id: number, idno: number) => {
+  const sitin = sitins.value.find((sitin:Sitin) => sitin.sitin_id === sitin_id)
+  if (sitin) {
+    student.idno = String(sitin.idno)
+    student.firstname = sitin.firstname
+    student.middlename = sitin.middlename
+    student.lastname = sitin.lastname
+    student.course = sitin.course
+    student.yearlevel = String(sitin.yearlevel)
+    student.points = await getStudent(String(idno)).then((result) => result[0].points)
+    // student.points = sitin.points
+    openLogoutModal.value = true
+  }
+}
 const handleSitinLogout = async (sitin_id: number, idno: number) => {
     const confirmLogout = confirm("Confirm Student Logout")
     if (confirmLogout){
@@ -79,6 +112,9 @@ const filteredSitins = computed(() => {
 </script>
 <template>
   <div class="flex flex-col items-center align-center h-screen w-screen text-white">
+    <LogoutStudentModalView v-if="openLogoutModal===true" 
+      @close="handleCloseModal" 
+      :student="student" class=""/>
     <div class="font-bold text-3xl mt-30">Sitins</div>
     <div class="w-7/10 flex justify-end">
 
@@ -118,7 +154,7 @@ const filteredSitins = computed(() => {
             <td>
               <button
                 class="bg-violet-700 hover:bg-violet-900 text-white font-bold py-2 px-4 rounded transition-colors duration-400"
-                @click="handleSitinLogout(Number(sitin.sitin_id), Number(sitin.idno))"
+                @click="logoutButtonClicked(Number(sitin.sitin_id), Number(sitin.idno))"
               >
                 Logout
               </button>

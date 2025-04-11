@@ -2,7 +2,6 @@
 import { reactive, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useStudentStore } from '@/stores/student.store'
-import { updateSession } from '../../api/student'
 import  SearchModalView from '@/components/SearchModalView.vue'
 import OpacityView from './OpacityView.vue'
 
