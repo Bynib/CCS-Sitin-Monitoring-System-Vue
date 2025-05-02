@@ -15,6 +15,9 @@ import SitinView from '@/views/admin/SitinView.vue';
 import RecordView from '@/views/admin/RecordView.vue';
 import FeedbackModalView from '@/components/FeedbackModalView.vue';
 import FeedbackView from '@/views/admin/FeedbackView.vue';
+import UploadFilesView from '@/views/admin/FilesView.vue';
+import FilesView from '@/views/student/FilesView.vue';
+import LaboratoryScheduleView from '@/views/admin/LaboratoryScheduleView.vue';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -98,6 +101,21 @@ const router = createRouter({
       path: '/feedbacks',
       name: 'feedbacks',
       component: FeedbackView
+    },
+    {
+      path: '/upload-files',
+      name: 'upload-files',
+      component: UploadFilesView
+    },
+    {
+      path: '/files',
+      name: 'files',
+      component: FilesView
+    },
+    {
+      path: '/laboratory-schedule',
+      name: 'laboratory-schedule',
+      component: LaboratoryScheduleView
     }
   ],
 })

@@ -62,7 +62,15 @@ const gotoRecords = () => {
 const gotoFeedbacks = () =>{
   router.push('/feedbacks')
 }
-
+const goToUploadFiles = () =>{
+  router.push('/upload-files')
+}
+const goToFiles = () => {
+  router.push('/files')
+}
+const goToLaboratorySchedule = () => {
+  router.push('/laboratory-schedule')
+}
 const handleLogout = () => {
   // updateSession(userDetail.idno);
   studentStore.setStudent({
@@ -151,6 +159,20 @@ const handleLogout = () => {
           class="normalButton"
         >Feedbacks</button>
         <button
+        @click="goToUploadFiles"
+          :class="
+            route.path === '/upload-files' ? 'normalButton border-b-2 border-b-yellow-300' : 'normalButton'
+          "
+          class="normalButton"
+        >Files</button>
+        <button
+        @click="goToLaboratorySchedule"
+          :class="
+            route.path === '/laboratory-schedule' ? 'normalButton border-b-2 border-b-yellow-300' : 'normalButton'
+          "
+          class="normalButton"
+        >Lab Schedules</button>
+        <button
           @click="handleLogout"
           class="font-bold text-white bg-red-500 hover:bg-red-600 rounded p-2 transition-colors duration-400"
         >
@@ -169,7 +191,7 @@ const handleLogout = () => {
           "
           class="normalButton"
         >
-          Announcement
+          Home
         </button>
         <button
           @click="goToSitinRules"
@@ -214,6 +236,16 @@ const handleLogout = () => {
           class="normalButton"
         >
           Reservation
+        </button>
+        <button
+          @click="goToFiles"
+          :class="
+            route.path === '/files'
+              ? 'normalButton border-b-2 border-b-yellow-300'
+              : 'normalButton'
+          "
+        >
+          Files
         </button>
         <button
           @click="goToProfile"

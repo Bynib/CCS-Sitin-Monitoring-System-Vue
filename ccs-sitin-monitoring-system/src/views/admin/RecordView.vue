@@ -189,8 +189,7 @@ onMounted(async () => {
   <div class="flex flex-col items-center h-screen w-screen text-white">
     <!-- <pie-chart :chart-data="chartData" :options="chartOptions" class="w-full h-64 mx-auto"></pie-chart> -->
     <div class="font-bold text-3xl mt-30">Records</div>
-    <div v-if="filteredData.length > 0" class="w-7/10 h-3/4 overflow-scroll flex flex-col">
-      <div class="flex flex-col w-full items-end gap-5 mb-10">
+      <div class="flex flex-col w-7/10 items-end gap-5 mb-10">
         <div class="flex w-full justify-end gap-5">
           <button @click="filterBy('laboratory')" :class="byLaboratory ? 'font-extrabold' : ''">By Laboratory</button>
           <button @click="filterBy('purpose')" :class="byPurpose ? 'font-extrabold' : ''">By Purpose</button>
@@ -242,6 +241,7 @@ onMounted(async () => {
           </button>
         </div>
       </div>
+    <div v-if="filteredData.length > 0" class="w-7/10 h-3/4 overflow-scroll flex flex-col">
       <table class="table-auto">
         <thead>
           <tr class="sticky top-0 bg-[#181818]">
