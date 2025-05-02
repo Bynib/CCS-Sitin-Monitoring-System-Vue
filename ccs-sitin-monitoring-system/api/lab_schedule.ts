@@ -6,3 +6,7 @@ export const getLabSchedule = async (lab: string) => {
 }
 
 
+export const updateSchedule = async (lab: string, time: string, day: string, status: string) => {
+    const response = await axios.put(`http://localhost:3000/schedule/update`, {lab: lab, time: time, day: day, status: status});
+    return response.data;
+}

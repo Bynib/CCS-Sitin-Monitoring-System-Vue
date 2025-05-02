@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import {getLabSchedule} from '@/../api/lab_schedule'
-import { ref } from 'vue'
+import {getLabSchedule, updateSchedule} from '@/../api/lab_schedule'
+import { ref, onBeforeMount } from 'vue'
 
-interface LabSchedule {
+type LabSchedule {
   id: number,
   lab_number: string,
-  day_type: string,
-  time_slot: string,
+  day: string,
+  time: string,
   status: string
 }
 
@@ -17,64 +17,58 @@ const labSchedules = ref<LabSchedule[]>([])
 const selectedLab = ref('')
 
 const timeSlots = [
-  "7:30-8:00 AM",
-  "8:00-8:30 AM",
-  "8:30-9:00 AM",
-  "9:00-9:30 AM",
-  "9:30-10:00 AM",
-  "10:00-10:30 AM",
-  "10:30-11:00 AM",
-  "11:00-11:30 AM",
-  "11:30 AM-12:00 PM",
-  "12:00-12:30 PM",
-  "12:30-1:00 PM",
-  "1:00-1:30 PM",
-  "1:30-2:00 PM",
-  "2:00-2:30 PM",
-  "2:30-3:00 PM",
-  "3:00-3:30 PM",
-  "3:30-4:00 PM",
-  "4:00-4:30 PM",
-  "4:30-5:00 PM",
-  "5:00-5:30 PM",
-  "5:30-6:00 PM",
-  "6:00-6:30 PM",
-  "6:30-7:00 PM",
-  "7:00-7:30 PM",
-  "7:30-8:00 PM",
-  "8:00-8:30 PM",
-  "8:30-9:00 PM"
+  "7:30-8:00",
+  "8:00-8:30",
+  "8:30-9:00",
+  "9:00-9:30",
+  "9:30-10:00",
+  "10:00-10:30",
+  "10:30-11:00",
+  "11:00-11:30",
+  "11:30-12:00",
+  "12:00-12:30",
+  "12:30-1:00",
+  "1:00-1:30",
+  "1:30-2:00",
+  "2:00-2:30",
+  "2:30-3:00",
+  "3:00-3:30",
+  "3:30-4:00",
+  "4:00-4:30",
+  "4:30-5:00",
+  "5:00-5:30",
+  "5:30-6:00",
+  "6:00-6:30",
+  "6:30-7:00",
+  "7:00-7:30",
+  "7:30-8:00",
+  "8:00-8:30",
+  "8:30-9:00"
 ]
-
-// Dummy schedule data
-const schedule = ref<Record<string, Record<string, string>>>({})
-
 
 // Toggle lab
 const toggleLab = async (lab: string) => {
   selectedLab.value = lab
   labSchedules.value = await getLabSchedule(lab)
-  timeSlots.forEach(time => {
-    schedule.value[time] = {
-      monWed: 'Closed',
-      tuesThurs: 'Closed',
-      fri: 'Closed',
-      sat: 'Closed'
-    }
-  })
   console.log(selectedLab.value)
   console.log(labSchedules.value)
 }
 
 // Toggle slot status
-// Toggle slot status
-const toggleSlot = (day: string, time: string) => {
+const toggleSlot = async (lab: string, day: string, time: string) => {
   const [startTime, endTime] = time.split(' - ')
-  schedule.value[`${startTime} - ${endTime}`][day] = schedule.value[`${startTime} - ${endTime}`][day] === 'Open' ? 'Closed' : 'Open'
+  console.log(schedule.value[time])
+  schedule.value[time][day] = schedule.value[time][day] === 'Open' ? 'Closed' : 'Open'
   console.log(time)
   console.log(day)
-  console.log(schedule.value[`${startTime} - ${endTime}`][day])
+  console.log(schedule.value[time][day])
+  // console.log(schedule[time]['monWed'])
+  // await updateSchedule(lab, time, day, schedule.value[time][day])
 }
+
+onBeforeMount(async () => {
+  toggleLab('517')
+})
 </script>
 
 <template>
@@ -110,15 +104,15 @@ const toggleSlot = (day: string, time: string) => {
             <td class="p-3 font-medium">{{ time }}</td>
             <td class="p-2 w-1/5">
               <button 
-                @click="toggleSlot('monWed', time)"
-                :class="['w-full py-2 px-1 rounded transition-colors', schedule[time].monWed === 'Open' ? 'bg-green-600 hover:bg-green-700' : 'bg-red-600 hover:bg-red-700']"
+                @click="toggleSlot(selectedLab, 'monWed', time)"
+                :class="['w-full py-2 px-1 rounded transition-colors', labSchedules.time  == time  ? 'bg-green-600 hover:bg-green-700' : 'bg-red-600 hover:bg-red-700']"
               >
-                {{ schedule[time].monWed }}
+                {{ schedule[time]['monWed'] }}
               </button>
             </td>
             <td class="p-2 w-1/5">
               <button 
-                @click="toggleSlot('tuesThurs', time)"
+                @click="toggleSlot(selectedLab, 'tuesThurs', time)"
                 :class="['w-full py-2 px-1 rounded transition-colors', schedule[time].tuesThurs === 'Open' ? 'bg-green-600 hover:bg-green-700' : 'bg-red-600 hover:bg-red-700']"
               >
                 {{ schedule[time].tuesThurs }}
@@ -126,7 +120,7 @@ const toggleSlot = (day: string, time: string) => {
             </td>
             <td class="p-2 w-1/5">
               <button 
-                @click="toggleSlot('fri', time)"
+                @click="toggleSlot(selectedLab, 'fri', time)"
                 :class="['w-full py-2 px-1 rounded transition-colors', schedule[time].fri === 'Open' ? 'bg-green-600 hover:bg-green-700' : 'bg-red-600 hover:bg-red-700']"
               >
                 {{ schedule[time].fri }}
@@ -134,7 +128,7 @@ const toggleSlot = (day: string, time: string) => {
             </td>
             <td class="p-2 w-1/5">
               <button 
-                @click="toggleSlot('sat', time)"
+                @click="toggleSlot(selectedLab, 'sat', time)"
                 :class="['w-full py-2 px-1 rounded transition-colors', schedule[time].sat === 'Open' ? 'bg-green-600 hover:bg-green-700' : 'bg-red-600 hover:bg-red-700']"
               >
                 {{ schedule[time].sat }}
