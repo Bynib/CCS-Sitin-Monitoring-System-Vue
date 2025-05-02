@@ -2,11 +2,11 @@
 import {getLabSchedule, updateSchedule} from '@/../api/lab_schedule'
 import { ref, onBeforeMount } from 'vue'
 
-type LabSchedule {
+interface LabSchedule {
   id: number,
   lab_number: string,
-  day: string,
-  time: string,
+  day_type: string,
+  time_slot: string,
   status: string
 }
 
@@ -25,7 +25,7 @@ const timeSlots = [
   "10:00-10:30",
   "10:30-11:00",
   "11:00-11:30",
-  "11:30-12:00",
+  "11:30 AM-12:00",
   "12:00-12:30",
   "12:30-1:00",
   "1:00-1:30",
@@ -46,10 +46,22 @@ const timeSlots = [
   "8:30-9:00"
 ]
 
+// Dummy schedule data
+const schedule = ref<Record<string, Record<string, string>>>({})
+
+
 // Toggle lab
 const toggleLab = async (lab: string) => {
   selectedLab.value = lab
   labSchedules.value = await getLabSchedule(lab)
+  timeSlots.forEach(time => {
+    schedule.value[time] = {
+      monWed: labSchedules.value.find(s => s.time_slot === time && s.day_type === 'monWed')?.status || 'Closed',
+      tuesThurs: labSchedules.value.find(s => s.time_slot === time && s.day_type === 'tuesThurs')?.status || 'Closed',
+      fri: labSchedules.value.find(s => s.time_slot === time && s.day_type === 'fri')?.status || 'Closed',
+      sat: labSchedules.value.find(s => s.time_slot === time && s.day_type === 'sat')?.status || 'Closed'
+    }
+  })
   console.log(selectedLab.value)
   console.log(labSchedules.value)
 }
@@ -63,7 +75,7 @@ const toggleSlot = async (lab: string, day: string, time: string) => {
   console.log(day)
   console.log(schedule.value[time][day])
   // console.log(schedule[time]['monWed'])
-  // await updateSchedule(lab, time, day, schedule.value[time][day])
+  await updateSchedule(lab, time, day, schedule.value[time][day])
 }
 
 onBeforeMount(async () => {
@@ -105,7 +117,7 @@ onBeforeMount(async () => {
             <td class="p-2 w-1/5">
               <button 
                 @click="toggleSlot(selectedLab, 'monWed', time)"
-                :class="['w-full py-2 px-1 rounded transition-colors', labSchedules.time  == time  ? 'bg-green-600 hover:bg-green-700' : 'bg-red-600 hover:bg-red-700']"
+                :class="['w-full py-2 px-1 rounded transition-colors', schedule[time]['monWed'] === 'Open' ? 'bg-green-600 hover:bg-green-700' : 'bg-red-600 hover:bg-red-700']"
               >
                 {{ schedule[time]['monWed'] }}
               </button>
