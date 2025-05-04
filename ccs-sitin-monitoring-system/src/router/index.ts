@@ -18,6 +18,7 @@ import FeedbackView from '@/views/admin/FeedbackView.vue';
 import UploadFilesView from '@/views/admin/FilesView.vue';
 import FilesView from '@/views/student/FilesView.vue';
 import LaboratoryScheduleView from '@/views/admin/LaboratoryScheduleView.vue';
+import LaboratoryScheduleStudentView from '@/views/student/LaboratoryScheduleView.vue';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -116,6 +117,11 @@ const router = createRouter({
       path: '/laboratory-schedule',
       name: 'laboratory-schedule',
       component: LaboratoryScheduleView
+    },
+    {
+      path: '/schedule',
+      name: 'schedule',
+      component: LaboratoryScheduleStudentView
     }
   ],
 })

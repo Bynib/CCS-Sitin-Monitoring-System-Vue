@@ -25,25 +25,25 @@ const timeSlots = [
   "10:00-10:30",
   "10:30-11:00",
   "11:00-11:30",
-  "11:30 AM-12:00",
+  "11:30-12:00",
   "12:00-12:30",
-  "12:30-1:00",
-  "1:00-1:30",
-  "1:30-2:00",
-  "2:00-2:30",
-  "2:30-3:00",
-  "3:00-3:30",
-  "3:30-4:00",
-  "4:00-4:30",
-  "4:30-5:00",
-  "5:00-5:30",
-  "5:30-6:00",
-  "6:00-6:30",
-  "6:30-7:00",
-  "7:00-7:30",
-  "7:30-8:00",
-  "8:00-8:30",
-  "8:30-9:00"
+  "12:30-13:00",
+  "13:00-13:30",
+  "13:30-14:00",
+  "14:00-14:30",
+  "14:30-15:00",
+  "15:00-15:30",
+  "15:30-16:00",
+  "16:00-16:30",
+  "16:30-17:00",
+  "17:00-17:30",
+  "17:30-18:00",
+  "18:00-18:30",
+  "18:30-19:00",
+  "19:00-19:30",
+  "19:30-20:00",
+  "20:00-20:30",
+  "20:30-21:00"
 ]
 
 // Dummy schedule data
@@ -116,45 +116,12 @@ onBeforeMount(async () => {
           <tr v-for="time in timeSlots" :key="time" class="border-t">
             <td class="p-3 font-medium">{{ time }}</td>
             <td v-for="day in ['monWed','tuesThurs','fri','sat']" class="p-2 w-1/5">
-              <button 
-                @click="toggleSlot(selectedLab, day, time)"
-                :class="['w-full py-2 px-1 rounded transition-colors', schedule[time][day] === 'Open' ? 'bg-green-600 hover:bg-green-700' : 'bg-red-600 hover:bg-red-700']"
+              <div 
+                :class="['w-full py-2 px-1 rounded transition-colors', schedule[time][day] === 'Open' ? 'bg-green-600' : 'bg-red-600 ']"
               >
                 {{ schedule[time][day] }}
-              </button>
+            </div>
             </td>
-            <!-- <td class="p-2 w-1/5">
-              <button 
-                @click="toggleSlot(selectedLab, 'monWed', time)"
-                :class="['w-full py-2 px-1 rounded transition-colors', schedule[time]['monWed'] === 'Open' ? 'bg-green-600 hover:bg-green-700' : 'bg-red-600 hover:bg-red-700']"
-              >
-                {{ schedule[time]['monWed'] }}
-              </button>
-            </td>
-            <td class="p-2 w-1/5">
-              <button 
-                @click="toggleSlot(selectedLab, 'tuesThurs', time)"
-                :class="['w-full py-2 px-1 rounded transition-colors', schedule[time].tuesThurs === 'Open' ? 'bg-green-600 hover:bg-green-700' : 'bg-red-600 hover:bg-red-700']"
-              >
-                {{ schedule[time].tuesThurs }}
-              </button>
-            </td>
-            <td class="p-2 w-1/5">
-              <button 
-                @click="toggleSlot(selectedLab, 'fri', time)"
-                :class="['w-full py-2 px-1 rounded transition-colors', schedule[time].fri === 'Open' ? 'bg-green-600 hover:bg-green-700' : 'bg-red-600 hover:bg-red-700']"
-              >
-                {{ schedule[time].fri }}
-              </button>
-            </td>
-            <td class="p-2 w-1/5">
-              <button 
-                @click="toggleSlot(selectedLab, 'sat', time)"
-                :class="['w-full py-2 px-1 rounded transition-colors', schedule[time].sat === 'Open' ? 'bg-green-600 hover:bg-green-700' : 'bg-red-600 hover:bg-red-700']"
-              >
-                {{ schedule[time].sat }}
-              </button>
-            </td> -->
           </tr>
         </tbody>
       </table>

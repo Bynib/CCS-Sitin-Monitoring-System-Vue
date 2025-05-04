@@ -71,6 +71,9 @@ const goToFiles = () => {
 const goToLaboratorySchedule = () => {
   router.push('/laboratory-schedule')
 }
+const goToSchedule  = () => {
+  router.push('/schedule');
+}
 const handleLogout = () => {
   // updateSession(userDetail.idno);
   studentStore.setStudent({
@@ -246,6 +249,16 @@ const handleLogout = () => {
           "
         >
           Files
+        </button>
+        <button
+          @click="goToSchedule"
+          :class="
+            route.path === '/schedule'
+              ? 'normalButton border-b-2 border-b-yellow-300'
+              : 'normalButton'
+          "
+        >
+          Lab Sched
         </button>
         <button
           @click="goToProfile"
