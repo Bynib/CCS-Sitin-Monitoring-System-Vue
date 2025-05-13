@@ -1,8 +1,26 @@
 <script setup lang="ts">
 import { getStudents } from '@/../api/student'
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { updateAll } from '@/../api/student'
+import { Button } from '@/components/ui/button'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
+import { Badge } from '@/components/ui/badge'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { ScrollArea } from '@/components/ui/scroll-area'
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import { Separator } from '@/components/ui/separator'
+import { Input } from '@/components/ui/input'
+import SitinStudentModalView from '@/components/SitinStudentModalView.vue'
 
 interface Student {
   idno: string
@@ -18,66 +36,175 @@ interface Student {
 
 const students = ref<Student[]>([])
 const router = useRouter()
+const isResetDialogOpen = ref(false)
+const searchQuery = ref('')
+const selectedStudent = ref<Student | null>(null)
+const showSitinModal = ref(false)
 
 onMounted(async () => {
-  students.value = (await getStudents()).sort((s: Student, t: Student) => Number(t.points) - Number(s.points))
-  console.log("hello")
-  console.log(students.value)
+  await fetchStudents()
 })
 
-const resetSessions = async()=>{
-  const confirmReset = confirm("CONFIRM RESET ALL STUDENT SESSIONS")
+const fetchStudents = async () => {
+  students.value = (await getStudents()).sort((s: Student, t: Student) => 
+    Number(t.points) - Number(s.points))
+}
 
-  if(confirmReset){
-    const result = await updateAll();
-    students.value = await getStudents()
+const resetSessions = async () => {
+  await updateAll()
+  await fetchStudents()
+  isResetDialogOpen.value = false
+}
 
+const getInitials = (student: Student) => {
+  return `${student.firstname.charAt(0)}${student.lastname.charAt(0)}`
+}
+
+const filteredStudents = computed(() => {
+  if (!searchQuery.value.trim()) {
+    return [...students.value]
   }
+  
+  const query = searchQuery.value.trim().toLowerCase()
+  return students.value.filter(student => {
+    // Check ID number
+    if (String(student.idno).includes(query)) return true
+    // Check name combinations
+    const fullName = `${student.firstname} ${student.middlename} ${student.lastname}`.toLowerCase()
+    const nameCombinations = [
+      `${student.firstname} ${student.lastname}`.toLowerCase(),
+      `${student.lastname}, ${student.firstname}`.toLowerCase(),
+      fullName,
+      student.firstname.toLowerCase(),
+      student.lastname.toLowerCase()
+    ]
+    
+    return nameCombinations.some(name => name.includes(query))
+  })
+})
+
+const openSitinModal = (student: Student) => {
+  selectedStudent.value = student
+  showSitinModal.value = true
 }
 </script>
 
 <template>
-  <div class="flex flex-col items-center align-center h-screen w-screen text-white">
-    <div class="font-bold text-3xl mt-30">Students</div>
-    <div v-if="students.length > 0" class="w-7/10 h-3/4 overflow-scroll flex flex-col">
-      <div class="flex flex-col w-full items-end gap-5 mb-10">
+  <div class="container mx-auto py-8">
+    <Card class="border shadow-sm">
+      <CardHeader>
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <CardTitle class="text-2xl font-bold">Student Management</CardTitle>
+          <div class="flex flex-col sm:flex-row gap-3">
+            <Input
+              v-model="searchQuery"
+              placeholder="Search by ID or name..."
+              class="w-full md:w-64"
+            />
+            <Button 
+              @click="isResetDialogOpen = true"
+              variant="destructive"
+              class="gap-2"
+            >
+              Reset All Sessions
+            </Button>
+          </div>
+        </div>
+      </CardHeader>
+      
+      <CardContent class="pt-6">
+        <div v-if="filteredStudents.length > 0">
+          <ScrollArea class="h-[calc(100vh-220px)] rounded-md">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <Card
+                v-for="student in filteredStudents"
+                :key="student.idno"
+                class="hover:shadow-md transition-shadow border hover:cursor-pointer"
+                @click="openSitinModal(student)"
+              >
+                <CardContent class="p-6">
+                  <div class="flex items-start gap-4">
+                    <Avatar class="h-12 w-12 border">
+                      <AvatarFallback class="font-medium">
+                        {{ getInitials(student) }}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div class="space-y-1">
+                      <h3 class="font-semibold">
+                        {{ student.lastname }}, {{ student.firstname }}
+                        <span v-if="student.middlename" class="text-muted-foreground">{{ student.middlename.charAt(0) + '.' }}</span>
+                      </h3>
+                      <p class="text-sm text-muted-foreground">{{ student.idno }}</p>
+                      <p class="text-sm text-muted-foreground truncate max-w-[200px]">{{ student.email }}</p>
+                    </div>
+                  </div>
 
-          <button @click="resetSessions" class="bg-blue-300 flex justify-center text-black p-2 rounded">RESET SESSIONS</button>
+                  <Separator class="my-4" />
 
-      </div>
-      <table class="table-auto">
-        <thead>
-          <tr>
-            <th>ID Number</th>
-            <th>Firstname</th>
-            <th>Middle Name</th>
-            <th>Last Name</th>
-            <th>Email</th>
-            <th>Course</th>
-            <th>Year Level</th>
-            <th>Remaining <br>Sessions</th>
-            <th>Points</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr
-            v-for="(student, index) in students"
-            :key="Number(student.idno)"
-            :class="index % 2 ? '  rounded-lg text-center' : ' bg-gray-800 rounded-lg text-center'"
-          >
-              <td class="p-5">{{ student.idno }}</td>
-              <td>{{ student.firstname }}</td>
-              <td>{{ student.middlename != '' ? student.middlename : '-' }}</td>
-              <td>{{ student.lastname }}</td>
-              <td>{{ student.email }}</td>
-              <td>{{ student.course }}</td>
-              <td>{{ student.yearlevel }}</td>
-              <td>{{ student.sessions }}</td>
-              <td>{{ student.points }}</td>
-            </tr>
-          </tbody>
-        </table>
-    </div>
-    <div v-else>No Student Registered...</div>
+                  <div class="grid grid-cols-2 gap-4">
+                    <div class="space-y-1">
+                      <p class="text-sm text-muted-foreground">Course</p>
+                      <Badge variant="outline" class="w-fit">
+                        {{ student.course }}
+                      </Badge>
+                    </div>
+                    <div class="space-y-1">
+                      <p class="text-sm text-muted-foreground">Year Level</p>
+                      <Badge variant="outline" class="w-fit">
+                        {{ student.yearlevel }}
+                      </Badge>
+                    </div>
+                    <div class="space-y-1">
+                      <p class="text-sm text-muted-foreground">Sessions</p>
+                      <Badge :variant="Number(student.sessions) > 0 ? 'default' : 'destructive'" class="w-fit">
+                        {{ student.sessions }}
+                      </Badge>
+                    </div>
+                    <div class="space-y-1">
+                      <p class="text-sm text-muted-foreground">Points</p>
+                      <Badge variant="default" class="w-fit">
+                        {{ student.points }}
+                      </Badge>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </ScrollArea>
+        </div>
+        
+        <div v-else class="flex flex-col items-center justify-center py-12 text-muted-foreground">
+          <p class="text-lg">No students found</p>
+          <p class="text-sm" v-if="searchQuery">No matches for "{{ searchQuery }}"</p>
+          <p class="text-sm" v-else>Students will appear here once registered in the system</p>
+        </div>
+      </CardContent>
+    </Card>
+
+    <!-- Reset Confirmation Dialog -->
+    <AlertDialog v-model:open="isResetDialogOpen">
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Confirm Session Reset</AlertDialogTitle>
+          <AlertDialogDescription>
+            This will reset all student sessions. This action cannot be undone.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogAction @click="resetSessions" class="bg-destructive text-white">
+            Confirm Reset
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+
+    <!-- Sit-in Modal -->
+    <SitinStudentModalView
+      v-if="showSitinModal && selectedStudent"
+      :student="selectedStudent"
+      @close="showSitinModal = false"
+      @sitin-success="fetchStudents"
+    />
   </div>
 </template>

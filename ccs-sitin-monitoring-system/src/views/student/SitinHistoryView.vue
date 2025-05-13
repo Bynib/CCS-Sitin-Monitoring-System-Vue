@@ -1,107 +1,194 @@
 <script setup lang="ts">
 import { ref, onMounted, reactive } from 'vue'
-import { getSitin, findSitin } from '../../../api/sitin'
-import FeedbackModalView from '@/components/FeedbackModalView.vue'
+import { getSitin } from '../../../api/sitin'
 import { useStudentStore } from '@/stores/student.store'
-import OpacityView from '@/components/OpacityView.vue'
+import FeedbackModalView from '@/components/FeedbackModalView.vue'
+
+// Shadcn components
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+} from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
+import { Badge } from '@/components/ui/badge'
+import { Skeleton } from '@/components/ui/skeleton'
 
 const studentStore = useStudentStore()
-const openFeedbackModal = ref(false)
+const openFeedbackDialog = ref(false)
+const isLoading = ref(true)
 const id = reactive({
   sitin_id: 0,
+  laboratory: 0,
 })
+
 interface Sitin {
-  sitin_id: Number
-  idno: Number
+  sitin_id: number
+  idno: number
   firstname: string
   middlename: string
   lastname: string
   course: string
-  yearlevel: Number
+  yearlevel: number
   purpose: string
-  laboratory: Number
+  laboratory: number
   date: string
   LoggedOut: string
-  feedback: string
+  feedback: string | null
 }
 
 const sitins = ref<Sitin[]>([])
 
 onMounted(async () => {
-  sitins.value = (await getSitin()).filter(
-    (sitin: Sitin) => sitin.LoggedOut !== null && sitin.idno === Number(studentStore.student.idNo),
-  ).reverse();
-  console.log(studentStore.student.idNo)
+  try {
+    const data = await getSitin()
+    sitins.value = data
+      .filter(
+        (sitin: Sitin) => 
+          sitin.LoggedOut !== null && 
+          sitin.idno === Number(studentStore.student.idNo))
+      .reverse()
+  } catch (error) {
+    console.error('Error fetching sit-in data:', error)
+  } finally {
+    isLoading.value = false
+  }
 })
 
-const handleButtonClick = async (sitin_id: number) => {
-  console.log(sitin_id)
-  openFeedbackModal.value = true
+const handleButtonClick = (sitin_id: number, laboratory: number) => {
   id.sitin_id = sitin_id
-  console.log("feedback:", sitins.value[0].feedback)
+  id.laboratory = laboratory
+  openFeedbackDialog.value = true
 }
 
+const handleFeedbackSubmitted = () => {
+  openFeedbackDialog.value = false
+  // Refresh the data after submission
+  const updatedSitin = sitins.value.find(s => s.sitin_id === id.sitin_id)
+  if (updatedSitin) {
+    updatedSitin.feedback = "Submitted" // Or update with actual feedback content
+  }
+}
+
+const formatDateTime = (dateString: string) => {
+  const date = new Date(dateString)
+  return {
+    date: date.toLocaleDateString(),
+    time: date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+  }
+}
 </script>
 
 <template>
-  <OpacityView v-if="openFeedbackModal === true" @click="openFeedbackModal = false"></OpacityView>
-  <FeedbackModalView
-    v-if="openFeedbackModal === true"
-    @close="openFeedbackModal = false"
-    class="absolute border-2 border-green-500 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-gray-800 p-4 rounded drop-shadow z-50"
-    :sitin_id="id.sitin_id"
-  ></FeedbackModalView>
-  <div class="flex flex-col items-center justify-center h-screen w-screen text-white">
-    <!-- <div class="font-bold text-3xl mt-10 mb-10"></div> -->
-    <div v-if="sitins.length > 0" class="w-7/10 h-3/4 overflow-scroll flex flex-col">
-      <table id="table" name="table" class="table-auto">
-        <thead>
-          <tr class="sticky top-0 bg-[#181818]">
-            <th>ID Number</th>
-            <th>Name</th>
-            <th>Course</th>
-            <th>Year Level</th>
-            <th>Purpose</th>
-            <th>Laboratory</th>
-            <th>Time In</th>
-            <th>Time Out</th>
-            <th>Feedback</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr
-            v-for="(sitin, index) in sitins"
-            :key="Number(sitin.sitin_id)"
-            :class="index % 2 ? '  rounded-lg text-center' : ' bg-gray-800 rounded-lg text-center'"
-          >
-            <td class="p-5">{{ sitin.idno }}</td>
-            <td>{{ sitin.firstname }} {{ sitin.lastname }}</td>
-            <td>{{ sitin.course }}</td>
-            <td>{{ sitin.yearlevel }}</td>
-            <td>{{ sitin.purpose }}</td>
-            <td>{{ sitin.laboratory }}</td>
-            <td>
-              {{ new Date(sitin.date).toLocaleDateString() }}
-              {{ new Date(sitin.date).toLocaleTimeString() }}
-            </td>
-            <td>
-              {{ new Date(sitin.LoggedOut).toLocaleDateString() }}
-              {{ new Date(sitin.LoggedOut).toLocaleTimeString() }}
-            </td>
-            <td>
-              <button
-                :disabled="sitin.feedback !== null"
-                :class="sitin.feedback === null ? 'bg-violet-700 hover:bg-violet-900 text-white font-bold py-2 px-4 rounded transition-colors duration-400' : ' py-2 px-4 rounded cursor-none text-gray-500'"
-                  
-                @click="handleButtonClick(Number(sitin.sitin_id))"
+  <div class="container mx-auto py-8">
+    <Card>
+      <CardHeader>
+        <CardTitle class="text-2xl font-bold tracking-tight">
+          Your Visit History
+        </CardTitle>
+        <p class="text-sm text-muted-foreground">
+          View all your previous laboratory visits and provide feedback
+        </p>
+      </CardHeader>
+
+      <CardContent>
+        <div v-if="isLoading" class="space-y-4">
+          <Skeleton class="h-12 w-full" />
+          <Skeleton class="h-12 w-full" />
+          <Skeleton class="h-12 w-full" />
+        </div>
+
+        <div v-else-if="sitins.length === 0" class="flex flex-col items-center justify-center py-12">
+          <div class="text-center space-y-2">
+            <p class="text-lg font-medium text-muted-foreground">
+              No visit history found
+            </p>
+            <p class="text-sm text-muted-foreground">
+              Your future laboratory visits will appear here
+            </p>
+          </div>
+        </div>
+
+        <div v-else class="rounded-md border">
+          <Table>
+            <TableHeader class="bg-secondary">
+              <TableRow>
+                <TableHead>Date</TableHead>
+                <TableHead>Name</TableHead>
+                <TableHead>Course & Year</TableHead>
+                <TableHead>Purpose</TableHead>
+                <TableHead>Lab</TableHead>
+                <TableHead>Time In</TableHead>
+                <TableHead>Time Out</TableHead>
+                <TableHead class="text-right">Feedback</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              <TableRow
+                v-for="sitin in sitins"
+                :key="sitin.sitin_id"
+                class="hover:bg-secondary/50 transition-colors"
               >
-              {{ sitin.feedback !== null ? 'Done' : 'Send' }}
-              </button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-    <div v-else>No sitin history...</div>
+                <TableCell>
+                  {{ formatDateTime(sitin.date).date }}
+                </TableCell>
+                <TableCell class="font-medium">
+                  {{ sitin.firstname }} {{ sitin.lastname }}
+                </TableCell>
+                <TableCell>
+                  <div class="flex items-center gap-2">
+                    <span>{{ sitin.course }}</span>
+                    <Badge variant="outline">Yr {{ sitin.yearlevel }}</Badge>
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <span class="line-clamp-1 max-w-[200px]">
+                    {{ sitin.purpose }}
+                  </span>
+                </TableCell>
+                <TableCell>
+                  <Badge variant="secondary">
+                    Lab {{ sitin.laboratory }}
+                  </Badge>
+                </TableCell>
+                <TableCell>
+                  {{ formatDateTime(sitin.date).time }}
+                </TableCell>
+                <TableCell>
+                  {{ formatDateTime(sitin.LoggedOut).time }}
+                </TableCell>
+                <TableCell class="text-right">
+                  <Button
+                    :disabled="sitin.feedback !== null"
+                    :variant="sitin.feedback === null ? 'default' : 'outline'"
+                    size="sm"
+                    @click="handleButtonClick(sitin.sitin_id, sitin.laboratory)"
+                  >
+                    {{ sitin.feedback !== null ? 'Submitted' : 'Provide Feedback' }}
+                  </Button>
+                </TableCell>
+              </TableRow>
+            </TableBody>
+          </Table>
+        </div>
+      </CardContent>
+    </Card>
+
+    <FeedbackModalView
+      v-if="openFeedbackDialog"
+      :sitin_id="id.sitin_id"
+      :open="openFeedbackDialog"
+      @close="openFeedbackDialog = false"
+      @submitted="handleFeedbackSubmitted"
+    />
   </div>
 </template>

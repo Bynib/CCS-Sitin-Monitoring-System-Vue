@@ -1,81 +1,180 @@
+<template>
+  <Sidebar class="bg-[#2e2e2e]" >
+    <SidebarHeader>
+      <div class="p-4 border-b flex items-center border-[#333]">
+        <img
+          @click="handleLogoClick"
+          src="@/assets/CCS_LOGO.png"
+          alt="CCS Logo"
+          class="cursor-pointer size-16 drop-shadow-logo"
+        />
+        <span class="text-md font-bold ml-2">CCS Sit-In System</span>
+      </div>
+    </SidebarHeader>
+    
+    <SidebarContent>
+      <!-- Admin Navigation -->
+      <SidebarGroup v-if="isAdmin">
+        <SidebarGroupLabel>Administration</SidebarGroupLabel>
+        <SidebarGroupContent>
+          <SidebarMenu>
+            <SidebarMenuItem v-for="link in adminLinks" :key="link.to">
+              <SidebarMenuButton asChild>
+                <RouterLink 
+                  :to="link.to"
+                  class="flex items-center gap-3 px-4 py-3 rounded-md transition-colors duration-200"
+                  :class="{
+                    'bg-yellow-500 hover:bg-yellow-600 text-gray-900': isActive(link.to),
+                    'hover:bg-[#333]': !isActive(link.to)
+                  }"
+                >
+                <!-- w-full bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-bold transition-colors -->
+                  <component :is="link.icon" class="h-5 w-5" />
+                  <span>{{ link.label }}</span>
+                </RouterLink>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          </SidebarMenu>
+        </SidebarGroupContent>
+      </SidebarGroup>
+
+      <!-- Student Navigation -->
+      <SidebarGroup v-else>
+        <SidebarGroupLabel>Student</SidebarGroupLabel>
+        <SidebarGroupContent>
+          <SidebarMenu>
+            <SidebarMenuItem v-for="link in studentLinks" :key="link.to">
+              <SidebarMenuButton asChild>
+                <RouterLink 
+                  :to="link.to"
+                  class="flex items-center gap-3 px-4 py-3 rounded-md transition-colors duration-200"
+                  :class="{
+                    'bg-yellow-500 hover:bg-yellow-600 text-gray-900': isActive(link.to),
+                    'hover:bg-[#333]': !isActive(link.to)
+                  }"
+                >
+                  <component :is="link.icon" class="h-5 w-5" />
+                  <span>{{ link.label }}</span>
+                </RouterLink>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          </SidebarMenu>
+        </SidebarGroupContent>
+      </SidebarGroup>
+    </SidebarContent>
+
+    <SidebarFooter>
+      <div class="p-4 border-t border-[#333] space-y-4">
+        <div class="flex items-center gap-3 px-4 py-2">
+          <div class="size-8 rounded-full bg-primary flex items-center justify-center text-white">
+            {{ userInitial }}
+          </div>
+          <div>
+            <div class="font-medium">{{ studentStore.student.firstName }} {{ studentStore.student.lastName }}</div>
+            <div class="text-xs text-muted-foreground">
+              {{ isAdmin ? 'Administrator' : 'Student' }}
+            </div>
+          </div>
+        </div>
+        
+        <Button 
+          @click="logOut"
+          variant="destructive"
+          class="w-full flex items-center gap-3"
+        >
+          <LogOut class="h-5 w-5" />
+          <span>Logout</span>
+        </Button>
+      </div>
+    </SidebarFooter>
+  </Sidebar>
+</template>
+
 <script setup lang="ts">
-import { reactive, ref } from 'vue'
+import { computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useStudentStore } from '@/stores/student.store'
-import  SearchModalView from '@/components/SearchModalView.vue'
-import OpacityView from './OpacityView.vue'
+import { 
+  LayoutDashboard,
+  Home,
+  User,
+  BookOpen,
+  Clock,
+  Calendar,
+  CalendarDays,
+  File,
+  AlertCircle,
+  LogOut,
+  Menu,
+  Users,
+  FileText,
+  MessageSquare,
+  Upload,
+  Megaphone,
+  CalendarCheck,
+  LaptopMinimal
+} from 'lucide-vue-next'
+import { Button } from '@/components/ui/button'
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarGroupLabel,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarFooter,
+  SidebarHeader
+} from "@/components/ui/sidebar"
 
-const state = reactive({
-  showModal: false,
-})
-
-const studentStore = useStudentStore()
-console.log(studentStore.student.username)
-const userDetail = reactive({
-  idno: Number(studentStore.student.idNo),
-})
-console.log(studentStore.student.firstName)
+interface NavigationLink {
+  to: string
+  label: string
+  icon: any
+  adminOnly?: boolean
+}
 
 const route = useRoute()
 const router = useRouter()
+const studentStore = useStudentStore()
 
-const goToProfile = () => {
-  router.push('/profile')
+const isAdmin = computed(() => String(studentStore.student.isAdmin) === '1')
+const userInitial = computed(() => studentStore.student.firstName.charAt(0).toUpperCase())
+
+const adminLinks: NavigationLink[] = [
+  { to: '/admin', label: 'Dashboard', icon: LayoutDashboard },
+  { to: '/students', label: 'Students', icon: Users },
+  { to: '/sitins', label: 'Sit-ins', icon: CalendarDays },
+  { to: '/records', label: 'Records', icon: FileText },
+  { to: '/feedbacks', label: 'Feedbacks', icon: MessageSquare },
+  { to: '/upload-files', label: 'Files', icon: Upload },
+  { to: '/laboratory-schedule', label: 'Lab Schedules', icon: Calendar },
+  {to: '/computers', label: 'Computers', icon: LaptopMinimal},
+  {to: '/reservations', label: 'Reservations', icon: BookOpen},
+  // { to: '/announcements', label: 'Announcements', icon: Megaphone }
+]
+
+const studentLinks: NavigationLink[] = [
+  { to: '/dashboard', label: 'Home', icon: Home },
+  // { to: '/sitin-rules', label: 'Sit-in Rules', icon: AlertCircle },
+  { to: '/laboratory-rules', label: 'Lab Rules', icon: AlertCircle },
+  { to: '/sitin-history', label: 'Sit-in History', icon: Clock },
+  { to: '/reservation', label: 'Reservation', icon: CalendarCheck },
+  { to: '/files', label: 'Files', icon: File },
+  { to: '/schedule', label: 'Lab Schedule', icon: Calendar },
+  { to: '/profile', label: 'Profile', icon: User }
+]
+
+const isActive = (path: string) => {
+  return route.path === path || route.path.startsWith(path + '/')
 }
 
-const goToAnnouncement = () => {
-  router.push('/dashboard')
+const handleLogoClick = () => {
+  router.push(isAdmin.value ? '/admin' : '/dashboard')
 }
 
-const goToSitinRules = () => {
-  router.push('/sitin-rules')
-}
-
-const goToLabRules = () => {
-  router.push('/laboratory-rules')
-}
-
-const goToSitinHistory = () => {
-  router.push('/sitin-history')
-}
-
-const goToReservation = () => {
-  router.push('/reservation')
-}
-
-const gotoHome = () => {
-  router.push('/admin')
-}
-
-const goToSearch = () => {
-  state.showModal = true
-}
-const gotoStudents = () => {
-  router.push('/students')
-}
-const gotoSitins = () => {
-  router.push('/sitins')
-}
-const gotoRecords = () => {
-  router.push('/records')
-}
-const gotoFeedbacks = () =>{
-  router.push('/feedbacks')
-}
-const goToUploadFiles = () =>{
-  router.push('/upload-files')
-}
-const goToFiles = () => {
-  router.push('/files')
-}
-const goToLaboratorySchedule = () => {
-  router.push('/laboratory-schedule')
-}
-const goToSchedule  = () => {
-  router.push('/schedule');
-}
-const handleLogout = () => {
-  // updateSession(userDetail.idno);
+const logOut = () => {
   studentStore.setStudent({
     idNo: '',
     firstName: '',
@@ -87,198 +186,14 @@ const handleLogout = () => {
     username: '',
     password: '',
     sessions: '',
+    isAdmin: '0'
   })
-  window.location.href = '/'
+  router.push('/login')
 }
-
 </script>
 
-<template>
-  <OpacityView v-if="state.showModal" @click="state.showModal = false"></OpacityView>
-  <SearchModalView
-  v-if="state.showModal"
-  @close="state.showModal = false"
-  class="fixed flex flex-col justify-center items-center bg-gray-800 p-4 rounded drop-shadow z-50"
-  />
-  <div class="flex justify-between fixed w-screen p-5">
-    <div class="flex justify-between w-screen">
-      <div class="flex flex-row gap-10">
-        
-        <img
-        src="@/assets/CCS_LOGO.png"
-        alt="CCS"
-        width="80"
-        class="cursor-pointer"
-        @click="String(studentStore.student.isAdmin)=== '1' ? gotoHome() :  goToAnnouncement()"
-        />
-        <div class="text-yellow-500 flex items-center text-3xl font-bold "> WELCOME, {{ studentStore.student.firstName }}!</div>
-      </div>
-      <div v-if="String(studentStore.student.isAdmin) === '1'" class="flex items-center gap-5 pr-2">
-        <button
-          @click="gotoHome"
-          :class="
-            route.path === '/admin' ? 'normalButton border-b-2 border-b-yellow-300' : 'normalButton'
-          "
-          class="normalButton"
-        >
-          Home
-        </button>
-        <button
-          @click="goToSearch"
-          :class="
-            route.path === '/search' ? 'normalButton border-b-2 border-b-yellow-300' : 'normalButton'
-          "
-        >
-          Search
-        </button>
-        <button
-          @click="gotoStudents"
-          :class="
-            route.path === '/students' ? 'normalButton border-b-2 border-b-yellow-300' : 'normalButton'
-          "
-          class="normalButton"
-        >
-          Students
-        </button>
-        <button
-        @click="gotoSitins"
-          :class="
-            route.path === '/sitins' ? 'normalButton border-b-2 border-b-yellow-300' : 'normalButton'
-          "
-          class="normalButton"
-        >Sitin</button>
-        <button
-        @click="gotoRecords"
-          :class="
-            route.path === '/records' ? 'normalButton border-b-2 border-b-yellow-300' : 'normalButton'
-          "
-          class="normalButton"
-        >View Sitin Records</button>
-        <button
-        @click="gotoFeedbacks"
-          :class="
-            route.path === '/feedbacks' ? 'normalButton border-b-2 border-b-yellow-300' : 'normalButton'
-          "
-          class="normalButton"
-        >Feedbacks</button>
-        <button
-        @click="goToUploadFiles"
-          :class="
-            route.path === '/upload-files' ? 'normalButton border-b-2 border-b-yellow-300' : 'normalButton'
-          "
-          class="normalButton"
-        >Files</button>
-        <button
-        @click="goToLaboratorySchedule"
-          :class="
-            route.path === '/laboratory-schedule' ? 'normalButton border-b-2 border-b-yellow-300' : 'normalButton'
-          "
-          class="normalButton"
-        >Lab Schedules</button>
-        <button
-          @click="handleLogout"
-          class="font-bold text-white bg-red-500 hover:bg-red-600 rounded p-2 transition-colors duration-400"
-        >
-          LOGOUT
-        </button>
-      </div>
-      <div v-else class="flex items-center gap-5 pr-2">
-        <!-- <button v-if="route.path === 'dashboard'" class="normalButton">Profile</button>
-        <button v-else class="normalButton border-b-2">Profile</button> -->
-        <button
-          @click="goToAnnouncement"
-          :class="
-            route.path === '/dashboard'
-              ? 'normalButton border-b-2 border-b-yellow-300'
-              : 'normalButton'
-          "
-          class="normalButton"
-        >
-          Home
-        </button>
-        <button
-          @click="goToSitinRules"
-          :class="
-            route.path === '/sitin-rules'
-              ? 'normalButton border-b-2 border-b-yellow-300'
-              : 'normalButton'
-          "
-          class="normalButton"
-        >
-          Sit-in Rules
-        </button>
-        <button
-          @click="goToLabRules"
-          :class="
-            route.path === '/laboratory-rules'
-              ? 'normalButton border-b-2 border-b-yellow-300'
-              : 'normalButton'
-          "
-          class="normalButton"
-        >
-          Lab Rules and Regulation
-        </button>
-        <button
-          @click="goToSitinHistory"
-          :class="
-            route.path === '/sitin-history'
-              ? 'normalButton border-b-2 border-b-yellow-300'
-              : 'normalButton'
-          "
-          class="normalButton"
-        >
-          Sitin History
-        </button>
-        <button
-          @click="goToReservation"
-          :class="
-            route.path === '/reservation'
-              ? 'normalButton border-b-2 border-b-yellow-300'
-              : 'normalButton'
-          "
-          class="normalButton"
-        >
-          Reservation
-        </button>
-        <button
-          @click="goToFiles"
-          :class="
-            route.path === '/files'
-              ? 'normalButton border-b-2 border-b-yellow-300'
-              : 'normalButton'
-          "
-        >
-          Files
-        </button>
-        <button
-          @click="goToSchedule"
-          :class="
-            route.path === '/schedule'
-              ? 'normalButton border-b-2 border-b-yellow-300'
-              : 'normalButton'
-          "
-        >
-          Lab Sched
-        </button>
-        <button
-          @click="goToProfile"
-          :class="
-            route.path === '/profile'
-              ? 'normalButton border-b-2 border-b-yellow-300'
-              : 'normalButton'
-          "
-        >
-          Profile
-        </button>
-        <button
-          @click="handleLogout"
-          class="font-bold text-white bg-red-500 hover:bg-red-600 rounded p-2 transition-colors duration-400"
-        >
-          LOGOUT
-        </button>
-      </div>
-    </div>
-  </div>
-</template>
-<!-- onclick="window.location.href = '/login'" -->
-<!-- onclick="window.location.href='/register'" -->
+<style scoped>
+.drop-shadow-logo {
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.25));
+}
+</style>

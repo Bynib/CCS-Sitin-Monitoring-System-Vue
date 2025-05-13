@@ -1,132 +1,137 @@
 <script setup lang="ts">
-import {getLabSchedule, updateSchedule} from '@/../api/lab_schedule'
+import { getLabSchedule } from '@/../api/lab_schedule'
 import { ref, onBeforeMount } from 'vue'
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
 interface LabSchedule {
-  id: number,
-  lab_number: string,
-  days: string,
-  time: string,
+  id: number
+  lab_number: string
+  days: string
+  time: string
   status: string
 }
 
 const labSchedules = ref<LabSchedule[]>([])
-
-
-// Labs
 const selectedLab = ref('')
+const isLoading = ref(false)
 
 const timeSlots = [
-  "7:30-8:00",
-  "8:00-8:30",
-  "8:30-9:00",
-  "9:00-9:30",
-  "9:30-10:00",
-  "10:00-10:30",
-  "10:30-11:00",
-  "11:00-11:30",
-  "11:30-12:00",
-  "12:00-12:30",
-  "12:30-13:00",
-  "13:00-13:30",
-  "13:30-14:00",
-  "14:00-14:30",
-  "14:30-15:00",
-  "15:00-15:30",
-  "15:30-16:00",
-  "16:00-16:30",
-  "16:30-17:00",
-  "17:00-17:30",
-  "17:30-18:00",
-  "18:00-18:30",
-  "18:30-19:00",
-  "19:00-19:30",
-  "19:30-20:00",
-  "20:00-20:30",
-  "20:30-21:00"
+  "7:30-8:00", "8:00-8:30", "8:30-9:00", "9:00-9:30", "9:30-10:00",
+  "10:00-10:30", "10:30-11:00", "11:00-11:30", "11:30-12:00", "12:00-12:30",
+  "12:30-13:00", "13:00-13:30", "13:30-14:00", "14:00-14:30", "14:30-15:00",
+  "15:00-15:30", "15:30-16:00", "16:00-16:30", "16:30-17:00", "17:00-17:30",
+  "17:30-18:00", "18:00-18:30", "18:30-19:00", "19:00-19:30", "19:30-20:00",
+  "20:00-20:30", "20:30-21:00"
 ]
 
-// Dummy schedule data
 const schedule = ref<Record<string, Record<string, string>>>({})
 
-
-// Toggle lab
 const toggleLab = async (lab: string) => {
-  selectedLab.value = lab
-  labSchedules.value = await getLabSchedule(lab)
+  try {
+    isLoading.value = true
+    selectedLab.value = lab
+    labSchedules.value = await getLabSchedule(lab)
 
-  timeSlots.forEach(time => {
-    schedule.value[time] = {
-      monWed: labSchedules.value.find(s => s.time === time && s.days === 'monWed')?.status || 'Closed',
-      tuesThurs: labSchedules.value.find(s => s.time === time && s.days === 'tuesThurs')?.status || 'Closed',
-      fri: labSchedules.value.find(s => s.time === time && s.days === 'fri')?.status || 'Closed',
-      sat: labSchedules.value.find(s => s.time === time && s.days === 'sat')?.status || 'Closed'
-    }
-  })
-  console.log(selectedLab.value)
-  console.log(labSchedules.value)
-}
-
-// Toggle slot status
-const toggleSlot = async (lab: string, day: string, time: string) => {
-  const [startTime, endTime] = time.split(' - ')
-  console.log(schedule.value[time])
-  schedule.value[time][day] = schedule.value[time][day] === 'Open' ? 'Closed' : 'Open'
-  console.log(time)
-  console.log(day)
-  console.log(schedule.value[time][day])
-  // console.log(schedule[time]['monWed'])
-  await updateSchedule(lab, time, day, schedule.value[time][day])
+    timeSlots.forEach(time => {
+      schedule.value[time] = {
+        monWed: labSchedules.value.find(s => s.time === time && s.days === 'monWed')?.status || 'Closed',
+        tuesThurs: labSchedules.value.find(s => s.time === time && s.days === 'tuesThurs')?.status || 'Closed',
+        fri: labSchedules.value.find(s => s.time === time && s.days === 'fri')?.status || 'Closed',
+        sat: labSchedules.value.find(s => s.time === time && s.days === 'sat')?.status || 'Closed'
+      }
+    })
+  } catch (error) {
+    console.error('Failed to load schedule:', error)
+  } finally {
+    isLoading.value = false
+  }
 }
 
 onBeforeMount(async () => {
-  toggleLab('517')
+  await toggleLab('517')
 })
 </script>
 
 <template>
-  <div class="flex flex-col items-center align-center min-h-screen w-screen text-white bg-gray-900 p-4">
-    <h1 class="text-3xl mt-20 mb-6">Laboratory Schedule</h1>
+  <div class="min-h-screen bg-gray-950 text-white">
+    <div class="container mx-auto px-4 py-8">
+      <Card class="bg-gray-900/50 border-gray-800 backdrop-blur-sm">
+        <CardHeader>
+          <CardTitle class="text-3xl font-bold text-center">
+            Laboratory Schedule
+          </CardTitle>
+        </CardHeader>
 
-    <!-- Labs -->
-    <div class="w-full flex justify-center flex-wrap gap-2 mb-6">
-      <div
-        v-for="lab in ['517', '524', '526', '528', '530', '542', '544']"
-        :key="lab"
-        @click="toggleLab(lab)"
-        :class="['w-20 h-10 flex justify-center items-center border rounded cursor-pointer transition-colors', selectedLab === lab ? 'bg-blue-500' : 'bg-gray-700 hover:bg-gray-600']"
-      >
-        <p>{{ lab }}</p>
-      </div>
-    </div>
-
-    <!-- Schedule Table -->
-    <div v-if="selectedLab" class="w-full lg:w-11/12 xl:w-10/12 mt-2  border rounded-lg overflow-auto shadow-lg" style="max-height: 70vh;">
-      <table class="table-auto w-full text-center">
-        <thead class="bg-gray-800 sticky top-0">
-          <tr>
-            <th class="p-3">Time</th>
-            <th class="p-3">Monday/Wednesday</th>
-            <th class="p-3">Tuesday/Thursday</th>
-            <th class="p-3">Friday</th>
-            <th class="p-3">Saturday</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="time in timeSlots" :key="time" class="border-t">
-            <td class="p-3 font-medium">{{ time }}</td>
-            <td v-for="day in ['monWed','tuesThurs','fri','sat']" class="p-2 w-1/5">
-              <div 
-                :class="['w-full py-2 px-1 rounded transition-colors', schedule[time][day] === 'Open' ? 'bg-green-600' : 'bg-red-600 ']"
+        <CardContent>
+          <!-- Lab Selection -->
+          <Tabs v-model="selectedLab" class="w-full mb-6">
+            <TabsList class="grid grid-cols-7 gap-2 h-auto bg-gray-800">
+              <TabsTrigger 
+                v-for="lab in ['517', '524', '526', '528', '530', '542', '544']"
+                :key="lab"
+                :value="lab"
+                class="py-2 data-[state=active]:bg-blue-600 data-[state=active]:text-white"
+                @click="toggleLab(lab)"
               >
-                {{ schedule[time][day] }}
-            </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+                Lab {{ lab }}
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
 
-    <div v-else class="mt-10 text-xl text-gray-400">Please select a lab</div>
+          <!-- Schedule Table -->
+          <div v-if="selectedLab && !isLoading" class="border border-gray-700 rounded-lg overflow-hidden">
+            <div class="overflow-auto" style="max-height: 70vh;">
+              <table class="w-full">
+                <thead class="bg-gray-800 sticky top-0">
+                  <tr>
+                    <th class="p-4 font-medium text-left">Time Slot</th>
+                    <th class="p-4 font-medium">Mon/Wed</th>
+                    <th class="p-4 font-medium">Tue/Thu</th>
+                    <th class="p-4 font-medium">Friday</th>
+                    <th class="p-4 font-medium">Saturday</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr 
+                    v-for="time in timeSlots" 
+                    :key="time" 
+                    class="border-t border-gray-700 hover:bg-gray-800/50 transition-colors"
+                  >
+                    <td class="p-4 font-medium text-gray-300">{{ time }}</td>
+                    <td 
+                      v-for="day in ['monWed', 'tuesThurs', 'fri', 'sat']" 
+                      :key="day" 
+                      class="p-2 text-center"
+                    >
+                      <div
+                        class="w-full py-2 px-1 rounded transition-all cursor-default"
+                        :class="{
+                          'text-green-600': schedule[time][day] === 'Open',
+                          'text-red-600': schedule[time][day] === 'Closed'
+                        }"
+                      >
+                        {{ schedule[time][day] }}
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Loading State -->
+          <div v-if="isLoading" class="flex flex-col items-center justify-center py-12 gap-4">
+            <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+            <p class="text-gray-400">Loading lab schedule...</p>
+          </div>
+
+          <!-- Empty State -->
+          <div v-if="!selectedLab && !isLoading" class="flex flex-col items-center justify-center py-12">
+            <p class="text-xl text-gray-400">Please select a lab to view schedule</p>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
   </div>
 </template>

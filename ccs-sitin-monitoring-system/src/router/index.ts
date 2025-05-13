@@ -19,6 +19,8 @@ import UploadFilesView from '@/views/admin/FilesView.vue';
 import FilesView from '@/views/student/FilesView.vue';
 import LaboratoryScheduleView from '@/views/admin/LaboratoryScheduleView.vue';
 import LaboratoryScheduleStudentView from '@/views/student/LaboratoryScheduleView.vue';
+import ComputerManagementView from '@/views/admin/ComputerManagementView.vue';
+import ReservationsView from '@/views/admin/ReservationsView.vue';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -122,6 +124,16 @@ const router = createRouter({
       path: '/schedule',
       name: 'schedule',
       component: LaboratoryScheduleStudentView
+    },
+    {
+      path: '/computers',
+      name: 'computers',
+      component: ComputerManagementView
+    },
+    {
+      path: '/reservations',
+      name: 'reservations',
+      component: ReservationsView
     }
   ],
 })

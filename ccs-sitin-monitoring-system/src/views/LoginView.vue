@@ -2,10 +2,14 @@
 import { ref } from 'vue'
 import { findStudent, getStudent } from '../../api/student'
 import { useRouter } from 'vue-router'
-
-import { reactive } from 'vue'
-
 import { useStudentStore } from '@/stores/student.store'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/card'
+import { Label } from '@/components/ui/label'
+import { Eye, EyeOff } from 'lucide-vue-next'
+import NavbarLandingView from '@/components/NavbarLandingView.vue'
+import { toast } from 'vue-sonner'
 
 const router = useRouter()
 const studentStore = useStudentStore()
@@ -13,33 +17,38 @@ const studentStore = useStudentStore()
 const username = ref('')
 const password = ref('')
 const showPassword = ref(false)
+const isLoading = ref(false)
 
 const handleLogin = async () => {
   try {
+    isLoading.value = true
     const student = {
       username: username.value,
       password: password.value,
     }
-    console.log(student)
 
     const response = await findStudent(student)
 
     if (response && response.success) {
-      console.log('Student found')
       studentStore.setStudent(response.studentInfo)
-      // Store username in localStorage
-      // localStorage.setItem('username', username.value);
-      console.log(studentStore.student.username)
+
       if (String(studentStore.student.isAdmin) === '1') {
         router.push('/admin')
-      } else{
-        router.push('/dashboard')}
+      } else {
+        router.push('/dashboard')
+      }
     } else {
-      alert('Invalid username or password')
+      toast.error('Invalid credentials', {
+        description: 'Please check your username and password',
+      })
     }
   } catch (error) {
     console.error('Error:', error)
-    alert('An error occurred')
+    toast.error('Login failed', {
+      description: 'An error occurred during login',
+    })
+  } finally {
+    isLoading.value = false
   }
 }
 
@@ -49,48 +58,82 @@ const handlePasswordVisibility = () => {
 </script>
 
 <template>
-  <div class="flex justify-center items-center h-screen">
-    <div
-      class="bg-[#2e2e2e] w-4/11 h-3/4 flex flex-col justify-center items-center rounded-2xl gap-5 text-center"
-    >
-      <img src="@/assets/Code typing-bro.svg" alt="CCS" width="200" class="cursor-pointer -mt-10" />
-      <form class="w-3/5">
-        <div class="flex flex-col gap-5 text-yellow-100 justify-center">
-          <input type="text" placeholder="username" v-model="username" class="input" />
-          <div class="flex text-yellow-100 justify-between">
-            <input
-              id="passwordinput"
-              :type="showPassword ? 'text' : 'password'"
-              placeholder="password"
-              v-model="password"
-              class="input w-full"
+  <div class="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800">
+    <NavbarLandingView />
+
+    <div class="container mx-auto flex items-center justify-center px-4 py-12">
+      <Card class="w-full max-w-md bg-gray-800/50 backdrop-blur-sm border-gray-700">
+        <CardHeader class="space-y-1">
+          <img
+            src="@/assets/Code typing-bro.svg"
+            alt="Login Illustration"
+            class="w-40 h-40 mx-auto mb-4"
+          />
+          <CardTitle class="text-2xl font-bold text-center text-yellow-300">
+            Welcome Back
+          </CardTitle>
+          <p class="text-sm text-center text-gray-400">
+            Enter your credentials to access your account
+          </p>
+        </CardHeader>
+
+        <CardContent class="grid gap-4">
+          <div class="grid gap-2">
+            <Label for="username" class="text-gray-300">Username</Label>
+            <Input
+              id="username"
+              type="text"
+              placeholder="Enter your username"
+              v-model="username"
+              class="bg-gray-700 border-gray-600 text-white focus-visible:ring-yellow-400"
             />
-            <div>
-              <i
-                v-if="!showPassword"
-                class="pi pi-eye-slash absolute -ml-5 cursor-pointer"
-                style="font-size: 15px"
-                @click.prevent="handlePasswordVisibility"
-              ></i>
-              <i
-                v-if="showPassword"
-                class="pi pi-eye absolute -ml-5 cursor-pointer"
-                style="font-size: 15px"
-                @click.prevent="handlePasswordVisibility"
-              ></i>
+          </div>
+          <div class="grid gap-2">
+            <Label for="password" class="text-gray-300">Password</Label>
+            <div class="relative">
+              <Input
+                id="password"
+                :type="showPassword ? 'text' : 'password'"
+                placeholder="Enter your password"
+                v-model="password"
+                class="bg-gray-700 border-gray-600 text-white focus-visible:ring-yellow-400 pr-10"
+              />
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                class="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                @click="handlePasswordVisibility"
+              >
+                <Eye v-if="showPassword" class="h-4 w-4 text-gray-400" />
+                <EyeOff v-else class="h-4 w-4 text-gray-400" />
+                <span class="sr-only">Toggle password visibility</span>
+              </Button>
             </div>
           </div>
-          <button
-            @click.prevent="handleLogin"
-            class="bg-violet-700 hover:bg-violet-900 text-white font-bold py-2 px-4 rounded transition-colors duration-400"
+        </CardContent>
+
+        <CardFooter class="flex flex-col gap-4">
+          <Button
+            class="w-full bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-bold transition-colors"
+            :disabled="isLoading"
+            @click="handleLogin"
           >
-            LOGIN
-          </button>
-          <p class="text-center">
-            Don't have an account? <a href="/register" class="text-violet-100">Register</a>
+            <Loader2 v-if="isLoading" class="mr-2 h-4 w-4 animate-spin" />
+            {{ isLoading ? 'Signing in...' : 'Sign In' }}
+          </Button>
+
+          <p class="text-sm text-center text-gray-400">
+            Don't have an account?
+            <RouterLink
+              to="/register"
+              class="font-medium text-yellow-400 hover:text-yellow-300 transition-colors"
+            >
+              Register here
+            </RouterLink>
           </p>
-        </div>
-      </form>
+        </CardFooter>
+      </Card>
     </div>
   </div>
 </template>

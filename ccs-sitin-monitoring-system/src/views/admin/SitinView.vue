@@ -2,189 +2,218 @@
 import { getStudent } from '../../../api/student'
 import { getSitin, updateSitinTime } from '../../../api/sitin'
 import { updateSession } from '../../../api/student'
-import { ref, onMounted, computed, reactive } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
-import LogoutStudentModalView from '@/components/LogoutStudentModalView.vue'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
+import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/button'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { ScrollArea } from '@/components/ui/scroll-area'
+import { Badge } from '@/components/ui/badge'
+import { CalendarClock } from 'lucide-vue-next'
 
 const router = useRouter()
-const openLogoutModal = ref(false)
-
-const searchQuery = ref()
+const searchQuery = ref('')
 
 interface Sitin {
-  sitin_id: Number
-  idno: Number
+  sitin_id: number
+  idno: number
   firstname: string
   middlename: string
   lastname: string
   course: string
-  yearlevel: Number
+  yearlevel: number
   purpose: string
-  laboratory: Number
+  laboratory: number
   date: string
-  LoggedOut: string
+  LoggedOut: string | null
   points: string
 }
 
 const sitins = ref<Sitin[]>([])
-
-const student = reactive({
-    idno: '',
-    firstname: '',
-    middlename: '',
-    lastname: '',
-    email: '',
-    course: '',
-    yearlevel: '',
-    sessions: '',
-    points: ''
-})
-
-const handleCloseModal = ()=>{
-  openLogoutModal.value=false
-}
+const currentSitin = ref<Sitin | null>(null)
+const logoutDialogOpen = ref(false)
 
 onMounted(async () => {
-  sitins.value = (await getSitin()).filter((sitin: Sitin) => sitin.LoggedOut === null).sort((a: Sitin, b: Sitin) => new Date(b.date).getTime() - new Date(a.date).getTime())
+  await fetchSitins()
 })
 
-const logoutButtonClicked = async(sitin_id: number, idno: number) => {
-  const sitin = sitins.value.find((sitin:Sitin) => sitin.sitin_id === sitin_id)
-  if (sitin) {
-    student.idno = String(sitin.idno)
-    student.firstname = sitin.firstname
-    student.middlename = sitin.middlename
-    student.lastname = sitin.lastname
-    student.course = sitin.course
-    student.yearlevel = String(sitin.yearlevel)
-    student.points = await getStudent(String(idno)).then((result) => result[0].points)
-    // student.points = sitin.points
-    openLogoutModal.value = true
-  }
+const fetchSitins = async () => {
+  const allSitins = await getSitin()
+  sitins.value = allSitins
+    .filter((sitin: Sitin) => sitin.LoggedOut === null)
+    .sort((a: Sitin, b: Sitin) => new Date(b.date).getTime() - new Date(a.date).getTime())
 }
-const handleSitinLogout = async (sitin_id: number, idno: number) => {
-    const confirmLogout = confirm("Confirm Student Logout")
-    if (confirmLogout){
 
-      console.log("hello")
-      const result = await updateSession(idno)
-      console.log(result)
-      const result2 = await updateSitinTime(sitin_id)
-      sitins.value = (await getSitin()).filter((sitin: Sitin) => sitin.LoggedOut === null)
-      console.log(result2)
-    }
+const prepareLogout = (sitin: Sitin) => {
+  currentSitin.value = sitin
+  logoutDialogOpen.value = true
+}
+
+const handleSitinLogout = async () => {
+  if (!currentSitin.value) return
+  
+  try {
+    await updateSession(currentSitin.value.idno)
+    await updateSitinTime(currentSitin.value.sitin_id)
+    await fetchSitins()
+    logoutDialogOpen.value = false
+  } catch (error) {
+    console.error('Error during logout:', error)
+  }
 }
 
 const filteredSitins = computed(() => {
-  if (!searchQuery.value || searchQuery.value === '') {
-    return sitins.value
-  } else {
-    return sitins.value.filter((sitin: Sitin) => {
-      return (
-        sitin.idno.toString().includes(searchQuery.value) ||
-        sitin.firstname.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-        sitin.lastname.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-        sitin.course.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-        sitin.purpose.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-        sitin.laboratory.toString().includes(searchQuery.value)
-      )
-    })
-  }
+  if (!searchQuery.value) return sitins.value
+  
+  const query = searchQuery.value.toLowerCase()
+  return sitins.value.filter((sitin) => {
+    return (
+      sitin.idno.toString().includes(query) ||
+      sitin.firstname.toLowerCase().includes(query) ||
+      sitin.lastname.toLowerCase().includes(query) ||
+      sitin.course.toLowerCase().includes(query) ||
+      sitin.purpose.toLowerCase().includes(query) ||
+      sitin.laboratory.toString().includes(query)
+    )
+  })
 })
 
-// watch(searchQuery, (newValue) => {
-//   if (!newValue) {
-//     filteredSitins.value = sitins.value
-//   } else {
-//     filteredSitins.value = sitins.value.filter((sitin:Sitin) => {
-//       return (
-//         sitin.idno.toString().includes(newValue) ||
-//         sitin.firstname.toLowerCase().includes(newValue.toLowerCase()) ||
-//         sitin.lastname.toLowerCase().includes(newValue.toLowerCase()) ||
-//         sitin.course.toLowerCase().includes(newValue.toLowerCase()) ||
-//         sitin.purpose.toLowerCase().includes(newValue.toLowerCase()) ||
-//         sitin.laboratory.toString().includes(newValue)
-//       )
-//     })
-//   }
-// })
-
+const formatDateTime = (dateString: string) => {
+  const date = new Date(dateString)
+  return {
+    date: date.toLocaleDateString(),
+    time: date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+  }
+}
 </script>
-<template>
-  <div class="flex flex-col items-center align-center h-screen w-screen text-white">
-    <LogoutStudentModalView v-if="openLogoutModal===true" 
-      @close="handleCloseModal" 
-      :student="student" class=""/>
-    <div class="font-bold text-3xl mt-30">Sitins</div>
-    <div class="w-7/10 flex justify-end">
 
-      <input  type="text" v-model="searchQuery" placeholder="Search" class="input w-1/5">
-    </div>
-    <br>
-    <div v-if="filteredSitins.length > 0" class="w-7/10 h-3/4 overflow-scroll flex flex-col">
-      <table class="table-auto">
-        <thead>
-          <tr class="sticky top-0 bg-[#181818]">
-            <th>ID Number</th>
-            <th>Name</th>
-            <th>Course</th>
-            <th>Year Level</th>
-            <th>Purpose</th>
-            <th>Laboratory</th>
-            <th>Time In</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr
-            v-for="(sitin, index) in filteredSitins"
-            :key="Number(sitin.sitin_id)"
-            :class="index % 2 ? '  rounded-lg text-center' : ' bg-gray-800 rounded-lg text-center'"
-          >
-            <td class="p-5">{{ sitin.idno }}</td>
-            <td>{{ sitin.firstname }} {{ sitin.middlename }} {{ sitin.lastname }}</td>
-            <td>{{ sitin.course }}</td>
-            <td>{{ sitin.yearlevel }}</td>
-            <td>{{ sitin.purpose }}</td>
-            <td>{{ sitin.laboratory }}</td>
-            <td>
-              {{ new Date(sitin.date).toLocaleDateString() }}
-              {{ new Date(sitin.date).toLocaleTimeString() }}
-            </td>
-            <td>
-              <button
-                class="bg-violet-700 hover:bg-violet-900 text-white font-bold py-2 px-4 rounded transition-colors duration-400"
-                @click="logoutButtonClicked(Number(sitin.sitin_id), Number(sitin.idno))"
+<template>
+  <div class="container mx-auto py-8">
+    <Card>
+      <CardHeader>
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <CardTitle class="text-2xl font-bold">Current Sit-ins</CardTitle>
+          <div class="w-full md:w-1/3">
+            <Input
+              v-model="searchQuery"
+              placeholder="Search students..."
+              class="w-full"
+            />
+          </div>
+        </div>
+      </CardHeader>
+      
+      <CardContent>
+        <ScrollArea class="h-[calc(100vh-220px)] rounded-md border">
+          <Table v-if="filteredSitins.length > 0">
+            <TableHeader class="bg-muted/50">
+              <TableRow>
+                <TableHead>ID Number</TableHead>
+                <TableHead>Student</TableHead>
+                <TableHead>Course</TableHead>
+                <TableHead>Year</TableHead>
+                <TableHead>Purpose</TableHead>
+                <TableHead>Lab</TableHead>
+                <TableHead>Time In</TableHead>
+                <TableHead class="text-right">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              <TableRow
+                v-for="sitin in filteredSitins"
+                :key="sitin.sitin_id"
+                class="hover:bg-muted/50"
               >
-                Logout
-              </button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-    <div v-else class="w-7/10 h-3/4 overflow-scroll flex flex-col">
-      <!-- <table class="table-auto">
-        <thead>
-          <tr class="sticky top-0 bg-[#181818]">
-            <th>ID Number</th>
-            <th>Name</th>
-            <th>Course</th>
-            <th>Year Level</th>
-            <th>Purpose</th>
-            <th>Laboratory</th>
-            <th>Time In</th>
-            <th>Actions</th>
-          </tr>
-        </thead> -->
-        <!-- <tbody>
-          <tr
-          >
-            <td class="p-5 bg-amber-200 text-2xl">No Sitin Found</td>
-          </tr>
-        </tbody> -->
-      <!-- </table> -->
-      <div class="w-full flex flex-row justify-center text-5xl mt-10">No Student Found...</div>
-    </div>
+                <TableCell class="font-medium">
+                  {{ sitin.idno }}
+                </TableCell>
+                <TableCell>
+                  {{ sitin.lastname }}, {{ sitin.firstname }}
+                  <span v-if="sitin.middlename">{{ sitin.middlename.charAt(0) + '.' }}</span>
+                </TableCell>
+                <TableCell>
+                  <Badge variant="outline">
+                    {{ sitin.course }}
+                  </Badge>
+                </TableCell>
+                <TableCell>
+                  <Badge variant="secondary">
+                    {{ sitin.yearlevel }}
+                  </Badge>
+                </TableCell>
+                <TableCell class="max-w-[200px] truncate">
+                  {{ sitin.purpose }}
+                </TableCell>
+                <TableCell>
+                  Lab {{ sitin.laboratory }}
+                </TableCell>
+                <TableCell>
+                  <div class="flex items-center gap-2">
+                    <CalendarClock class="w-4 h-4 text-muted-foreground" />
+                    <div class="flex flex-col">
+                      <span class="text-sm">{{ formatDateTime(sitin.date).date }}</span>
+                      <span class="text-xs text-muted-foreground">{{ formatDateTime(sitin.date).time }}</span>
+                    </div>
+                  </div>
+                </TableCell>
+                <TableCell class="text-right">
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    @click="prepareLogout(sitin)"
+                  >
+                    Logout
+                  </Button>
+                </TableCell>
+              </TableRow>
+            </TableBody>
+          </Table>
+          
+          <div v-else class="flex flex-col items-center justify-center py-12 text-muted-foreground">
+            <p class="text-lg">No active sit-ins found</p>
+            <p class="text-sm">Students will appear here when they check in</p>
+          </div>
+        </ScrollArea>
+      </CardContent>
+    </Card>
+
+    <!-- Logout Confirmation Dialog -->
+    <AlertDialog v-model:open="logoutDialogOpen">
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Confirm Student Logout</AlertDialogTitle>
+          <AlertDialogDescription>
+            Are you sure you want to log out 
+            <span v-if="currentSitin" class="font-semibold">
+              {{ currentSitin?.firstname }} {{ currentSitin?.lastname }} ({{ currentSitin?.idno }})
+            </span>?
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogAction @click="handleSitinLogout">
+            Confirm Logout
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   </div>
 </template>

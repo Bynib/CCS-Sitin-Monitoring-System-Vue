@@ -1,165 +1,161 @@
 <script setup lang="ts">
-import {getLabSchedule, updateSchedule} from '@/../api/lab_schedule'
+import { getLabSchedule, updateSchedule } from '@/../api/lab_schedule'
 import { ref, onBeforeMount } from 'vue'
+import { Button } from '@/components/ui/button'
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
+import { toast } from 'vue-sonner'
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
 interface LabSchedule {
-  id: number,
-  lab_number: string,
-  days: string,
-  time: string,
+  id: number
+  lab_number: string
+  days: string
+  time: string
   status: string
 }
 
 const labSchedules = ref<LabSchedule[]>([])
-
-
-// Labs
 const selectedLab = ref('')
+const isLoading = ref(false)
 
 const timeSlots = [
-  "7:30-8:00",
-  "8:00-8:30",
-  "8:30-9:00",
-  "9:00-9:30",
-  "9:30-10:00",
-  "10:00-10:30",
-  "10:30-11:00",
-  "11:00-11:30",
-  "11:30 AM-12:00",
-  "12:00-12:30",
-  "12:30-1:00",
-  "1:00-1:30",
-  "1:30-2:00",
-  "2:00-2:30",
-  "2:30-3:00",
-  "3:00-3:30",
-  "3:30-4:00",
-  "4:00-4:30",
-  "4:30-5:00",
-  "5:00-5:30",
-  "5:30-6:00",
-  "6:00-6:30",
-  "6:30-7:00",
-  "7:00-7:30",
-  "7:30-8:00",
-  "8:00-8:30",
-  "8:30-9:00"
+  "7:30-8:00", "8:00-8:30", "8:30-9:00", "9:00-9:30", "9:30-10:00",
+  "10:00-10:30", "10:30-11:00", "11:00-11:30", "11:30-12:00", "12:00-12:30",
+  "12:30-13:00", "13:00-13:30", "13:30-14:00", "14:00-14:30", "14:30-15:00",
+  "15:00-15:30", "15:30-16:00", "16:00-16:30", "16:30-17:00", "17:00-17:30",
+  "17:30-18:00", "18:00-18:30", "18:30-19:00", "19:00-19:30", "19:30-20:00",
+  "20:00-20:30", "20:30-21:00"
 ]
 
-// Dummy schedule data
 const schedule = ref<Record<string, Record<string, string>>>({})
 
-
-// Toggle lab
 const toggleLab = async (lab: string) => {
-  selectedLab.value = lab
-  labSchedules.value = await getLabSchedule(lab)
+  try {
+    isLoading.value = true
+    selectedLab.value = lab
+    labSchedules.value = await getLabSchedule(lab)
 
-  timeSlots.forEach(time => {
-    schedule.value[time] = {
-      monWed: labSchedules.value.find(s => s.time === time && s.days === 'monWed')?.status || 'Closed',
-      tuesThurs: labSchedules.value.find(s => s.time === time && s.days === 'tuesThurs')?.status || 'Closed',
-      fri: labSchedules.value.find(s => s.time === time && s.days === 'fri')?.status || 'Closed',
-      sat: labSchedules.value.find(s => s.time === time && s.days === 'sat')?.status || 'Closed'
-    }
-  })
-  console.log(selectedLab.value)
-  console.log(labSchedules.value)
+    timeSlots.forEach(time => {
+      schedule.value[time] = {
+        monWed: labSchedules.value.find(s => s.time === time && s.days === 'monWed')?.status || 'Closed',
+        tuesThurs: labSchedules.value.find(s => s.time === time && s.days === 'tuesThurs')?.status || 'Closed',
+        fri: labSchedules.value.find(s => s.time === time && s.days === 'fri')?.status || 'Closed',
+        sat: labSchedules.value.find(s => s.time === time && s.days === 'sat')?.status || 'Closed'
+      }
+    })
+  } catch (error) {
+    toast.error('Failed to load schedule', {
+      description: 'Could not fetch lab schedule data'
+    })
+  } finally {
+    isLoading.value = false
+  }
 }
 
-// Toggle slot status
 const toggleSlot = async (lab: string, day: string, time: string) => {
-  const [startTime, endTime] = time.split(' - ')
-  console.log(schedule.value[time])
-  schedule.value[time][day] = schedule.value[time][day] === 'Open' ? 'Closed' : 'Open'
-  console.log(time)
-  console.log(day)
-  console.log(schedule.value[time][day])
-  // console.log(schedule[time]['monWed'])
-  await updateSchedule(lab, time, day, schedule.value[time][day])
+  try {
+    const newStatus = schedule.value[time][day] === 'Open' ? 'Closed' : 'Open'
+    schedule.value[time][day] = newStatus
+    
+    await updateSchedule(lab, time, day, newStatus)
+    toast.success('Schedule updated', {
+      description: `Lab ${lab} ${day} ${time} set to ${newStatus}`
+    })
+  } catch (error) {
+    toast.error('Update failed', {
+      description: 'Could not update the schedule'
+    })
+    // Revert on error
+    schedule.value[time][day] = schedule.value[time][day] === 'Open' ? 'Closed' : 'Open'
+  }
 }
 
 onBeforeMount(async () => {
-  toggleLab('517')
+  await toggleLab('517')
 })
 </script>
 
 <template>
-  <div class="flex flex-col items-center align-center min-h-screen w-screen text-white bg-gray-900 p-4">
-    <h1 class="text-3xl mt-20 mb-6">Laboratory Schedule</h1>
+  <div class="min-h-screen bg-gray-950 text-white">
+    <div class="container mx-auto px-4 py-8">
+      <Card class="bg-gray-900/50 border-gray-800 backdrop-blur-sm">
+        <CardHeader>
+          <CardTitle class="text-3xl font-bold text-center">
+            Laboratory Schedule Management
+          </CardTitle>
+        </CardHeader>
 
-    <!-- Labs -->
-    <div class="w-full flex justify-center flex-wrap gap-2 mb-6">
-      <div
-        v-for="lab in ['517', '524', '526', '528', '530', '542', '544']"
-        :key="lab"
-        @click="toggleLab(lab)"
-        :class="['w-20 h-10 flex justify-center items-center border rounded cursor-pointer transition-colors', selectedLab === lab ? 'bg-blue-500' : 'bg-gray-700 hover:bg-gray-600']"
-      >
-        <p>{{ lab }}</p>
-      </div>
+        <CardContent>
+          <!-- Lab Selection -->
+          <Tabs v-model="selectedLab" class="w-full mb-6">
+            <TabsList class="grid grid-cols-7 gap-2 h-auto bg-gray-800">
+              <TabsTrigger 
+                v-for="lab in ['517', '524', '526', '528', '530', '542', '544']"
+                :key="lab"
+                :value="lab"
+                class="py-2 data-[state=active]:bg-blue-600 data-[state=active]:text-red"
+                @click="toggleLab(lab)"
+              >
+                Lab {{ lab }}
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
+
+          <!-- Schedule Table -->
+          <div v-if="selectedLab && !isLoading" class="border border-gray-700 rounded-lg overflow-hidden">
+            <div class="overflow-auto" style="max-height: 70vh;">
+              <table class="w-full">
+                <thead class="bg-gray-800 sticky top-0">
+                  <tr>
+                    <th class="p-4 font-medium text-left">Time Slot</th>
+                    <th class="p-4 font-medium">Mon/Wed</th>
+                    <th class="p-4 font-medium">Tue/Thu</th>
+                    <th class="p-4 font-medium">Friday</th>
+                    <th class="p-4 font-medium">Saturday</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr 
+                    v-for="time in timeSlots" 
+                    :key="time" 
+                    class="border-t border-gray-700 hover:bg-gray-800/50 transition-colors"
+                  >
+                    <td class="p-4 font-medium text-gray-300">{{ time }}</td>
+                    <td 
+                      v-for="day in ['monWed', 'tuesThurs', 'fri', 'sat']" 
+                      :key="day" 
+                      class="p-2 text-center"
+                    >
+                      <Button
+                        @click="toggleSlot(selectedLab, day, time)"
+                        :variant="schedule[time][day] === 'Open' ? 'default' : 'destructive'"
+                        class="w-full py-2 px-1 transition-all"
+                        :class="{
+                          'bg-green-600 hover:bg-green-700': schedule[time][day] === 'Open',
+                          'bg-red-600 hover:bg-red-700': schedule[time][day] === 'Closed'
+                        }"
+                      >
+                        {{ schedule[time][day] }}
+                      </Button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Loading State -->
+          <div v-if="isLoading" class="flex flex-col items-center justify-center py-12 gap-4">
+            <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+            <p class="text-gray-400">Loading lab schedule...</p>
+          </div>
+
+          <!-- Empty State -->
+          <div v-if="!selectedLab && !isLoading" class="flex flex-col items-center justify-center py-12">
+            <p class="text-xl text-gray-400">Please select a lab to view schedule</p>
+          </div>
+        </CardContent>
+      </Card>
     </div>
-
-    <!-- Schedule Table -->
-    <div v-if="selectedLab" class="w-full lg:w-11/12 xl:w-10/12 mt-2  border rounded-lg overflow-auto shadow-lg" style="max-height: 70vh;">
-      <table class="table-auto w-full text-center">
-        <thead class="bg-gray-800 sticky top-0">
-          <tr>
-            <th class="p-3">Time</th>
-            <th class="p-3">Monday/Wednesday</th>
-            <th class="p-3">Tuesday/Thursday</th>
-            <th class="p-3">Friday</th>
-            <th class="p-3">Saturday</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="time in timeSlots" :key="time" class="border-t">
-            <td class="p-3 font-medium">{{ time }}</td>
-            <td v-for="day in ['monWed','tuesThurs','fri','sat']" class="p-2 w-1/5">
-              <button 
-                @click="toggleSlot(selectedLab, day, time)"
-                :class="['w-full py-2 px-1 rounded transition-colors', schedule[time][day] === 'Open' ? 'bg-green-600 hover:bg-green-700' : 'bg-red-600 hover:bg-red-700']"
-              >
-                {{ schedule[time][day] }}
-              </button>
-            </td>
-            <!-- <td class="p-2 w-1/5">
-              <button 
-                @click="toggleSlot(selectedLab, 'monWed', time)"
-                :class="['w-full py-2 px-1 rounded transition-colors', schedule[time]['monWed'] === 'Open' ? 'bg-green-600 hover:bg-green-700' : 'bg-red-600 hover:bg-red-700']"
-              >
-                {{ schedule[time]['monWed'] }}
-              </button>
-            </td>
-            <td class="p-2 w-1/5">
-              <button 
-                @click="toggleSlot(selectedLab, 'tuesThurs', time)"
-                :class="['w-full py-2 px-1 rounded transition-colors', schedule[time].tuesThurs === 'Open' ? 'bg-green-600 hover:bg-green-700' : 'bg-red-600 hover:bg-red-700']"
-              >
-                {{ schedule[time].tuesThurs }}
-              </button>
-            </td>
-            <td class="p-2 w-1/5">
-              <button 
-                @click="toggleSlot(selectedLab, 'fri', time)"
-                :class="['w-full py-2 px-1 rounded transition-colors', schedule[time].fri === 'Open' ? 'bg-green-600 hover:bg-green-700' : 'bg-red-600 hover:bg-red-700']"
-              >
-                {{ schedule[time].fri }}
-              </button>
-            </td>
-            <td class="p-2 w-1/5">
-              <button 
-                @click="toggleSlot(selectedLab, 'sat', time)"
-                :class="['w-full py-2 px-1 rounded transition-colors', schedule[time].sat === 'Open' ? 'bg-green-600 hover:bg-green-700' : 'bg-red-600 hover:bg-red-700']"
-              >
-                {{ schedule[time].sat }}
-              </button>
-            </td> -->
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <div v-else class="mt-10 text-xl text-gray-400">Please select a lab</div>
   </div>
 </template>

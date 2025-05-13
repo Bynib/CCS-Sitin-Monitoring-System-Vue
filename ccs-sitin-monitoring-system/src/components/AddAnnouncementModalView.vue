@@ -1,63 +1,91 @@
 <script setup lang="ts">
-import { ref, defineEmits } from 'vue'
+import { ref } from 'vue'
 import { addAnnouncement } from '../../api/announcement'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
+import { Label } from '@/components/ui/label'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 
 const title = ref('')
 const content = ref('')
-const isModalOpen = ref(true)
 
 const emit = defineEmits(['close', 'refreshAnnouncements'])
+
 const createAnnouncement = async () => {
   try {
-    const announcement = { title: title.value, content: content.value }
-    const response = await addAnnouncement(announcement)
-    console.log('announcement added', response)
+    const announcement = { 
+      title: title.value, 
+      content: content.value 
+    }
+    await addAnnouncement(announcement)
     title.value = ''
     content.value = ''
-    isModalOpen.value = false // Close modal after success
     emit('close')
     emit('refreshAnnouncements')  
   } catch (error) {
     console.error('Error:', error)
-    alert('An error occurred')
+    // Consider using a toast notification here instead of alert
+    alert('Failed to create announcement. Please try again.')
   }
 }
 
 const handleCancel = () => {
-  // isModalOpen.value = false // Smoothly close modal on cancel
+  title.value = ''
+  content.value = ''
   emit('close')
-  
 }
 </script>
 
 <template>
-  <div class="w-1/4 gap-5 text-white p-10 rounded bg-gray-900 drop-shadow z-50 flex flex-col">
-    <h2 class="text-2xl font-bold text-violet-400">Create Announcement</h2>
-    <form @submit.prevent="createAnnouncement">
-      <div class="mb-4">
-        <label for="title" class="block text-white font-bold mb-2">Title:</label>
-        <input type="text" id="title" v-model="title" class="input w-full" required />
-      </div>
-      <div class="mb-4">
-        <label for="content" class="block text-white font-bold mb-2">Content:</label>
-        <textarea id="content" v-model="content" class="input w-full" required></textarea>
-      </div>
-      <div class="flex flex-row justify-end gap-5">
-
-        <button
-        type="button"
-        class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded transition-colors duration-400"
-        @click="handleCancel"
-      >
-        Cancel
-      </button>
-      <button
-        type="submit"
-        class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded transition-colors duration-400"
-        >
-        Create
-      </button>
-    </div>
-    </form>
-  </div>
+  <Dialog :open="true" @update:open="handleCancel">
+    <DialogContent class="sm:max-w-[425px]">
+      <DialogHeader>
+        <DialogTitle class="text-primary">
+          Create New Announcement
+        </DialogTitle>
+      </DialogHeader>
+      
+      <form @submit.prevent="createAnnouncement" class="space-y-4">
+        <div class="space-y-2">
+          <Label for="title">Title</Label>
+          <Input 
+            id="title" 
+            v-model="title" 
+            placeholder="Enter announcement title"
+            required
+          />
+        </div>
+        
+        <div class="space-y-2">
+          <Label for="content">Content</Label>
+          <Textarea
+            id="content"
+            v-model="content"
+            placeholder="Write your announcement content here..."
+            class="min-h-[120px]"
+            required
+          />
+        </div>
+        
+        <div class="flex justify-end gap-3 pt-2">
+          <Button 
+            type="button" 
+            variant="outline"
+            @click="handleCancel"
+          >
+            Cancel
+          </Button>
+          <Button type="submit">
+            Publish Announcement
+          </Button>
+        </div>
+      </form>
+    </DialogContent>
+  </Dialog>
 </template>

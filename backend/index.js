@@ -6,6 +6,8 @@ import sitinRoute from './routes/sitin.route.js';
 import recordRoute from './routes/record.route.js';
 import fileRoute from './routes/file.route.js';
 import scheduleRoute from './routes/lab_sched.route.js';
+import pcRoute from './routes/pc.route.js';
+import reservationRoute from './routes/reservation.route.js';   
 import bodyParser from 'body-parser';
 
 
@@ -23,6 +25,8 @@ app.use('/sitin', sitinRoute);
 app.use('/record', recordRoute);
 app.use('/file', fileRoute);
 app.use('/schedule', scheduleRoute);
+app.use('/pc', pcRoute);
+app.use('/reservation', reservationRoute);
 
 const port = process.env.PORT || 3000;
 

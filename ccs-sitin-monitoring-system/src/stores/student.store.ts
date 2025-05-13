@@ -2,7 +2,9 @@ import { defineStore } from "pinia";
 import { reactive } from "vue";
 
 export const useStudentStore = defineStore("student",() => {
-
+    const user = reactive({
+        type: 'none'
+    })
     const student = reactive({
         idNo: '',
         firstName: '',
@@ -34,7 +36,10 @@ export const useStudentStore = defineStore("student",() => {
     function getStudent() {
         return student
     }
-    return { student, setStudent, getStudent };
+    function setUser(type: string) {
+        user.type = type;
+    }
+    return { student, setStudent, getStudent, user };
     
 },
 

@@ -1,18 +1,19 @@
 <script lang="ts" setup>
 import { getFiles, addFile, removeFile } from '@/../api/file'
 import { onMounted, ref } from 'vue'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { ScrollArea } from '@/components/ui/scroll-area'
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
+import { Progress } from '@/components/ui/progress'
+import { FileText, FileUp, Trash2, Download } from 'lucide-vue-next'
+import { toast } from 'vue-sonner'
 
 const selectedFile = ref<File | null>(null)
 const uploading = ref(false)
-const deleting = ref(false)
-const uploadStatus = ref('')
-const deleteStatus = ref('')
-const fileInput = ref<HTMLInputElement | null>(null)
-
-const onFileSelected = (event: Event) => {
-  const target = event.target as HTMLInputElement
-  selectedFile.value = target.files?.[0] || null
-}
+const uploadProgress = ref(0)
+const MAX_FILE_SIZE = 45 * 1024 * 1024 // 45MB
 
 interface FileDetails {
   id: number
@@ -22,192 +23,214 @@ interface FileDetails {
 
 const files = ref<FileDetails[]>([])
 
-const arrayBufferToBase64 = (buffer: ArrayBuffer): string => {
-  let binary = ''
-  const bytes = new Uint8Array(buffer)
-  const len = bytes.byteLength
-  for (let i = 0; i < len; i++) {
-    binary += String.fromCharCode(bytes[i])
-  }
-  return btoa(binary)
+const onFileSelected = (event: Event) => {
+  const target = event.target as HTMLInputElement
+  selectedFile.value = target.files?.[0] || null
 }
 
-const MAX_FILE_SIZE = 45 * 1024 * 1024 // 45MB
+const arrayBufferToBase64 = (buffer: ArrayBuffer): string => {
+  const bytes = new Uint8Array(buffer)
+  return btoa(String.fromCharCode(...bytes))
+}
 
 const handleFileUpload = async () => {
   if (!selectedFile.value) {
-    console.warn('No file selected.')
-    alert('Please select a file to upload.')
+    toast.error('No file selected', {
+      description: 'Please select a file to upload'
+    })
     return
   }
 
   const file = selectedFile.value
-
   if (file.size > MAX_FILE_SIZE) {
-    alert(`File size exceeds ${formatFileSize(MAX_FILE_SIZE)}. Please upload a smaller file.`)
+    toast.error('File too large', {
+      description: `Maximum file size is ${formatFileSize(MAX_FILE_SIZE)}`
+    })
     return
   }
+
+  const toastId = toast.loading('Uploading file...')
+  
   try {
     uploading.value = true
-    console.log(uploading.value)
-    uploadStatus.value = 'Uploading...'
+    uploadProgress.value = 30
+    
     const arrayBuffer = await file.arrayBuffer()
+    uploadProgress.value = 70
     const base64String = arrayBufferToBase64(arrayBuffer)
-
-    console.log('Base64:', base64String.slice(0, 100), '...')
-
+    
     await addFile({
       filename: file.name,
       filedata: base64String,
     })
 
     files.value = (await getFiles()).reverse()
-
-    uploading.value = false
-    console.log(uploading.value)
-
-    uploadStatus.value = 'Uploaded'
-    setTimeout(() => {
-      uploadStatus.value = ''
-    }, 2000)
+    uploadProgress.value = 100
+    
+    toast.success('Upload successful', {
+      description: `${file.name} has been uploaded`,
+      id: toastId
+    })
+    
     selectedFile.value = null
-    if (fileInput.value) {
-      fileInput.value.value = ''
-    }
   } catch (error: any) {
     console.error(error)
-    if (error?.response?.data?.sqlMessage?.includes('max_allowed_packet')) {
-      alert('File too large to be uploaded to the server. Please upload a smaller file.')
-    } else {
-      alert('An error occurred while uploading. Please try again.')
-    }
+    toast.error('Upload failed', {
+      description: error?.response?.data?.sqlMessage?.includes('max_allowed_packet') 
+        ? 'File too large for server' 
+        : 'An error occurred while uploading',
+      id: toastId
+    })
+  } finally {
+    uploading.value = false
+    setTimeout(() => uploadProgress.value = 0, 1000)
   }
 }
 
-const base64ToBlob = (base64: string, mimeType: string): Blob => {
+const base64ToBlob = (base64: string): Blob => {
   const binaryString = atob(base64)
-  const len = binaryString.length
-  const bytes = new Uint8Array(len)
-
-  for (let i = 0; i < len; i++) {
+  const bytes = new Uint8Array(binaryString.length)
+  for (let i = 0; i < binaryString.length; i++) {
     bytes[i] = binaryString.charCodeAt(i)
   }
-
-  return new Blob([bytes], { type: mimeType })
+  return new Blob([bytes], { type: 'application/octet-stream' })
 }
 
 const formatFileSize = (size: number): string => {
-  if (size < 1024) {
-    return `${size} bytes`
-  } else if (size < 1048576) {
-    return `${(size / 1024).toFixed(2)} KB`
-  } else {
-    return `${(size / 1048576).toFixed(2)} MB`
-  }
+  if (size < 1024) return `${size} bytes`
+  if (size < 1048576) return `${(size / 1024).toFixed(2)} KB`
+  return `${(size / 1048576).toFixed(2)} MB`
 }
 
 const downloadFile = (file: FileDetails) => {
-  const base64String = file.filedata
-
   try {
-    const blob = base64ToBlob(base64String, 'application/pdf')
+    const blob = base64ToBlob(file.filedata)
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
     a.download = file.filename
     a.click()
     URL.revokeObjectURL(url)
+    toast.success('Download started', {
+      description: `${file.filename} is being downloaded`
+    })
   } catch (error) {
-    console.error(error)
+    toast.error('Download failed', {
+      description: 'Could not download the file'
+    })
   }
 }
 
 const deleteFile = async (id: number, filename: string) => {
-  const confirmDelete = confirm(`Are you sure you want to delete "${filename}"?`)
-  if (confirmDelete){
-
-    try {
-      deleting.value = true
-      deleteStatus.value = 'Deleting...'
-      const response = await removeFile(id)
-      console.log(response)
-    files.value = (await getFiles()).reverse()
-    deleting.value = false
-    deleteStatus.value = 'Deleted'
-    setTimeout(() => {
-      deleteStatus.value = ''
-    },2000)
+  const toastId = toast.loading('Deleting file...')
+  try {
+    await removeFile(id)
+    files.value = files.value.filter(f => f.id !== id)
+    toast.success('File deleted', {
+      description: `${filename} has been removed`,
+      id: toastId
+    })
   } catch (error) {
-    console.error(error)
+    toast.error('Deletion failed', {
+      description: 'Could not delete the file',
+      id: toastId
+    })
   }
 }
+
+const getFileIcon = (filename: string) => {
+  if (filename.endsWith('.pdf')) return 'text-red-500'
+  if (filename.endsWith('.docx')) return 'text-blue-500'
+  if (filename.endsWith('.xlsx')) return 'text-green-500'
+  return 'text-gray-500'
 }
 
 onMounted(async () => {
-  files.value = (await getFiles()).reverse()
-  console.log(files.value[0].filename)
+  try {
+    files.value = (await getFiles()).reverse()
+  } catch (error) {
+    toast.error('Error loading files', {
+      description: 'Could not fetch file list'
+    })
+  }
 })
 </script>
 
 <template>
-  <div class="flex flex-col items-center h-screen w-screen text-white gap-10">
-    <div class="w-7/10 flex flex-row mt-30 justify-end gap-5">
-      <label>Upload File (Max file size: 45 MB):</label>
-
-      <input
-        ref="fileInput"
-        type="file"
-        @change="onFileSelected"
-        class="input mb-4 w-100 cursor-pointer hover:border-blue-500"
-      />
-      <button
-        @click="handleFileUpload"
-        class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded transition-colors duration-400"
-      >
-        Upload
-      </button>
-    </div>
-    <p v-if="deleteStatus" :class="deleteStatus === 'Deleted' ? 'text-green-500' : 'text-blue-500'">{{ deleteStatus }} {{deleteStatus === 'Deleted' ? '✅' : ''}}</p>
-    <p v-if="uploadStatus" :class="uploadStatus === 'Uploaded' ? 'text-green-500' : 'text-blue-500'">{{ uploadStatus }} {{uploadStatus === 'Uploaded' ? '✅' : ''}}</p>
-    <p v-if="files.length === 0">Fetching files...</p>
-    <div v-else class="w-7/12 h-screen overflow-scroll">
-      <table class="table-auto w-full">
-        <thead class="h-10 border-b border-white">
-          <tr class="sticky top-0 bg-[#181818]">
-            <td>Filename</td>
-            <td>Size</td>
-            <td class=" w-1/15 text-center">Action</td>
-          </tr>
-        </thead>
-        <tbody class="">
-          <tr
-            v-for="(file, index) in files"
-            :key="file.filename"
-            :class="index % 2 ? '  rounded-lg h-10' : ' bg-gray-800 rounded-lg h-10'"
+  <div class="container mx-auto py-8">
+    <Card class="mb-6">
+      <CardHeader>
+        <CardTitle class="text-2xl">File Manager</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div class="flex flex-col sm:flex-row gap-4 items-center">
+          <div class="grid w-full max-w-sm items-center gap-1.5">
+            <Input 
+              id="file-upload" 
+              type="file" 
+              @change="onFileSelected"
+              class="cursor-pointer"
+            />
+            <p class="text-sm text-muted-foreground">Max file size: 45MB</p>
+          </div>
+          <Button 
+            @click="handleFileUpload" 
+            :disabled="!selectedFile || uploading"
+            class="gap-2"
           >
-          <td class="p-3">
-            <template v-if="file.filename.endsWith('.pdf')">
-              <i class="pi pi-file-pdf text-orange-500"></i>
-            </template>
-            <template v-if="file.filename.endsWith('.docx')">
-              <i class="pi pi-file-word text-blue-500"></i>
-            </template>
-            <template v-if="file.filename.endsWith('.xlsx')">
-              <i class="pi pi-file-excel text-blue-500"></i>
-            </template>
-            {{ file.filename }}</td>
-            <td>{{ formatFileSize((file.filedata.length * 3) / 4) }}</td>
-            <td class="w-1/15 text-blue-400 text-center">
-              <div class="w-full flex justify-between px-2">
+            <FileUp class="w-4 h-4" />
+            Upload
+          </Button>
+        </div>
+        
+        <Progress v-if="uploading" :model-value="uploadProgress" class="mt-4 h-2" />
+      </CardContent>
+    </Card>
 
-                <i class="pi pi-download cursor-pointer" @click="downloadFile(file)"></i>
-                <i class="pi pi-trash cursor-pointer text-red-400" @click="deleteFile(file.id, file.filename)"></i>
-                
-              </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+    <Card>
+      <CardHeader>
+        <div class="flex justify-between items-center">
+          <CardTitle>Uploaded Files</CardTitle>
+          <Badge variant="outline">{{ files.length }} files</Badge>
+        </div>
+      </CardHeader>
+      <CardContent>
+        <ScrollArea class="h-[calc(100vh-320px)]">
+          <div v-if="files.length === 0" class="flex flex-col items-center justify-center py-12">
+            <Alert>
+              <Info class="w-4 h-4" />
+              <AlertTitle>No files yet...</AlertTitle>
+              <AlertDescription>
+                Upload your first file using the form above
+              </AlertDescription>
+            </Alert>
+          </div>
+
+          <div v-else class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            <Card v-for="file in files" :key="file.id" class="hover:shadow-lg transition-shadow">
+              <CardHeader class="flex flex-row items-center gap-4 pb-2">
+                <FileText :class="getFileIcon(file.filename)" class="w-6 h-6" />
+                <div class="space-y-1">
+                  <CardTitle class="text-lg line-clamp-1">{{ file.filename }}</CardTitle>
+                  <p class="text-sm text-muted-foreground">
+                    {{ formatFileSize((file.filedata.length * 3) / 4) }}
+                  </p>
+                </div>
+              </CardHeader>
+              <CardFooter class="flex justify-end gap-2">
+                <Button variant="outline" size="sm" @click="downloadFile(file)">
+                  <Download class="w-4 h-4 mr-2" />
+                  Download
+                </Button>
+                <Button variant="destructive" size="sm" @click="deleteFile(file.id, file.filename)">
+                  <Trash2 class="w-4 h-4 mr-2" />
+                  Delete
+                </Button>
+              </CardFooter>
+            </Card>
+          </div>
+        </ScrollArea>
+      </CardContent>
+    </Card>
   </div>
 </template>
