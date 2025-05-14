@@ -7,7 +7,6 @@ import OpacityView from './OpacityView.vue'
 
 const openSitinModal = ref(false)
 const isSearchModalOpen = ref(true)
-const router = useRouter()
 
 const emit = defineEmits(['close'])
 
@@ -57,17 +56,12 @@ const handleSearch = async () => {
   }
 }
 const handleCancel = () => {
-  // window.location.reload();
-  // router.go(0)
   emit('close')
 }
 const handleCloseModals = ()=>{
   handleCancel()
   openSitinModal.value=false
 }
-// const handleRefreshSitins = ()=>{
-//   emit('refreshSitins')
-// }
 </script>
 
 <template>

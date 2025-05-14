@@ -1,12 +1,10 @@
 <script setup lang="ts">
-import NavbarLandingView from '@/components/NavbarLandingView.vue'
 import { Button } from '@/components/ui/button'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card'
 </script>
 
 <template>
   <div class="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800">
-    <!-- <NavbarLandingView /> -->
     
     <div class="container mx-auto px-4 py-12 flex flex-col lg:flex-row items-center justify-center gap-12 min-h-[calc(100vh-4rem)]">
       <div class="w-full lg:w-1/2 flex justify-center">

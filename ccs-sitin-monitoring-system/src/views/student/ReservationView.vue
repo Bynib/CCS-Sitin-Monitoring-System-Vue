@@ -2,7 +2,7 @@
 import { ref, computed, onMounted, watch, reactive } from 'vue'
 import { getAvailablePCs, createReservation } from '@/../api/reservation'
 import { addNotification } from '@/../api/notification'
-import { findSitin } from '@/../api/sitin' // Add this import
+import { findSitin } from '@/../api/sitin'
 import { useStudentStore } from '@/stores/student.store'
 
 const studentStore = useStudentStore()
@@ -11,10 +11,8 @@ const studentDetails = reactive({
   sessions: studentStore.student.sessions
 })
 
-// Add this reactive property
 const hasActiveSitin = ref(false)
 
-// Laboratory data
 const laboratories = ref([
   { id: '517', name: 'Lab 517' },
   { id: '524', name: 'Lab 524' },
@@ -25,7 +23,6 @@ const laboratories = ref([
   { id: '544', name: 'Lab 544' }
 ])
 
-// Purpose options
 const purposeOptions = ref([
   'C Programming', 
   'Java Programming', 
@@ -42,7 +39,6 @@ const purposeOptions = ref([
   'PHP Programming'
 ])
 
-// Time slots (30-minute intervals)
 const timeSlots = ref([
   "7:30", "8:00", "8:30", "9:00", "9:30", "10:00", 
   "10:30", "11:00", "11:30", "12:00", "12:30", "13:00", 
@@ -57,14 +53,12 @@ interface PC {
   status: string
 }
 
-// Form data
 const selectedLab = ref('')
 const selectedDate = ref('')
 const selectedTimeSlot = ref('')
 const selectedPC = ref('')
 const purpose = ref('')
 
-// UI state
 const loadingPCs = ref(false)
 const availablePCs = ref<PC[]>([])
 const submitting = ref(false)
@@ -74,12 +68,10 @@ const notification = ref({
   success: false
 })
 
-// Add this computed property
 const isFormDisabled = computed(() => {
   return hasActiveSitin.value
 })
 
-// Computed properties
 const minDate = computed(() => {
   const today = new Date()
   return today.toISOString().split('T')[0]
@@ -92,21 +84,15 @@ const canSubmit = computed(() => {
          !hasActiveSitin.value
 })
 
-// Add this function to check for active sit-ins
 const checkActiveSitin = async () => {
   try {
     const sitins = await findSitin(studentDetails.idno)
-    // console.log(sitins.some((s:any) => !s.loggedout))
     hasActiveSitin.value = sitins.some((s:any) => !s.loggedout)
-    // if (hasActiveSitin.value) {
-    //   showNotification('You cannot make a reservation while currently seated in a lab', false)
-    // }
   } catch (error) {
     console.error('Error checking active sit-ins:', error)
   }
 }
 
-// Methods
 const fetchAvailablePCs = async () => {
   if (!selectedLab.value || !selectedDate.value || !selectedTimeSlot.value || hasActiveSitin.value) return
   
@@ -126,7 +112,6 @@ const fetchAvailablePCs = async () => {
 }
 
 const isSlotAvailable = (time: string) => {
-  // Add your business logic here to determine time slot availability
   return !hasActiveSitin.value
 }
 
@@ -176,7 +161,6 @@ const resetForm = () => {
   purpose.value = ''
 }
 
-// Watchers
 watch([selectedDate, selectedTimeSlot], () => {
   if (selectedLab.value && selectedDate.value && selectedTimeSlot.value) {
     fetchAvailablePCs()
@@ -185,7 +169,7 @@ watch([selectedDate, selectedTimeSlot], () => {
 
 onMounted(() => {
   selectedDate.value = minDate.value
-  checkActiveSitin() // Check for active sit-ins when component mounts
+  checkActiveSitin()
 })
 </script>
 
@@ -196,7 +180,6 @@ onMounted(() => {
         Computer Lab Reservation
       </h1>
 
-      <!-- Add this alert for active sit-in -->
       <div v-if="hasActiveSitin" class="mb-6">
         <Alert variant="destructive">
           <AlertCircle class="w-4 h-4" />
@@ -207,7 +190,6 @@ onMounted(() => {
         </Alert>
       </div>
 
-      <!-- Laboratory Selection -->
       <div v-if="!hasActiveSitin" class="mb-6 space-y-2">
         <label class="block text-sm font-medium text-gray-300">Select Laboratory</label>
         <select 
@@ -228,7 +210,6 @@ onMounted(() => {
         </select>
       </div>
 
-      <!-- Date Selection -->
       <div v-if="!hasActiveSitin" class="mb-6 space-y-2">
         <label class="block text-sm font-medium text-gray-300">Select Date</label>
         <input 
@@ -240,7 +221,6 @@ onMounted(() => {
         >
       </div>
 
-      <!-- Time Slot Selection -->
       <div v-if="!hasActiveSitin" class="mb-6 space-y-2">
         <label class="block text-sm font-medium text-gray-300">Select Start Time</label>
         <select
@@ -260,7 +240,6 @@ onMounted(() => {
         </select>
       </div>
 
-      <!-- PC Selection -->
       <div class="mb-6 space-y-2" v-if="selectedLab && selectedDate && selectedTimeSlot">
         <label class="block text-sm font-medium text-gray-300">Select Computer</label>
         <div v-if="loadingPCs" class="text-center py-4">
@@ -294,7 +273,6 @@ onMounted(() => {
         </div>
       </div>
 
-      <!-- Student Information -->
       <div class="mb-6 space-y-2" v-if="selectedPC">
         <label class="block text-sm font-medium text-gray-300">Student ID</label>
         <input 
@@ -315,7 +293,6 @@ onMounted(() => {
         >
       </div>
 
-      <!-- Purpose Selection -->
       <div class="mb-6 space-y-2" v-if="selectedPC">
         <label class="block text-sm font-medium text-gray-300">Purpose</label>
         <select
@@ -330,7 +307,6 @@ onMounted(() => {
         </select>
       </div>
 
-      <!-- Submit Button -->
       <button 
         v-if="!hasActiveSitin"
         @click="submitReservation"
@@ -347,7 +323,6 @@ onMounted(() => {
         </span>
       </button>
 
-      <!-- Notification -->
       <div 
         v-if="notification.show" 
         class="mt-4 p-3 rounded-md border"
@@ -363,7 +338,6 @@ onMounted(() => {
 </template>
 
 <style>
-/* Custom scrollbar for dark mode */
 ::-webkit-scrollbar {
   width: 8px;
 }
@@ -381,7 +355,6 @@ onMounted(() => {
   background: #6b7280;
 }
 
-/* Date picker icon color */
 input[type="date"]::-webkit-calendar-picker-indicator {
   filter: invert(0.8);
 }

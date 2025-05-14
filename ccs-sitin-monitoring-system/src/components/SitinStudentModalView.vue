@@ -172,7 +172,6 @@ const handleCancel = () => {
     </CardHeader>
     <CardContent>
       <div class="space-y-4">
-        <!-- Error messages -->
         <div v-if="errorMessage" class="mb-4">
           <Alert variant="destructive">
             <AlertCircle class="w-4 h-4" />
@@ -186,7 +185,6 @@ const handleCancel = () => {
           </Alert>
         </div>
 
-        <!-- Student info -->
         <div class="grid grid-cols-2 gap-4">
           <div class="space-y-1">
             <p class="text-sm text-muted-foreground">ID Number</p>
@@ -221,7 +219,6 @@ const handleCancel = () => {
 
         <Separator class="my-4" />
 
-        <!-- Form fields -->
         <div class="space-y-4">
           <div class="space-y-2">
             <label for="purpose" class="text-sm font-medium">Purpose <span class="text-red-500">*</span></label>
@@ -259,7 +256,6 @@ const handleCancel = () => {
             </Select>
           </div>
 
-          <!-- PC Selection -->
           <div class="space-y-2" v-if="laboratory">
             <label for="pcno" class="text-sm font-medium">PC Number <span class="text-red-500">*</span></label>
             <div v-if="loadingPCs" class="text-center py-2">
@@ -291,7 +287,6 @@ const handleCancel = () => {
           </div>
         </div>
 
-        <!-- Buttons -->
         <div class="flex justify-end gap-3 pt-4">
           <Button 
             variant="outline" 
@@ -311,7 +306,6 @@ const handleCancel = () => {
     </CardContent>
   </Card>
 
-  <!-- Confirmation Dialog -->
   <AlertDialog v-model:open="showConfirmDialog">
     <AlertDialogContent>
       <AlertDialogHeader>

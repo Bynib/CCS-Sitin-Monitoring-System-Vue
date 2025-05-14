@@ -208,7 +208,6 @@ interface ReservationLog {
   status: string
 }
 
-// Laboratory data
 const laboratories = ref([
   { id: '517', name: 'Lab 517' },
   { id: '522', name: 'Lab 522' },
@@ -220,43 +219,35 @@ const laboratories = ref([
   { id: '544', name: 'Lab 544' }
 ])
 
-// Filter controls
 const filterLab = ref('')
 const filterStatus = ref('')
 const filterFromDate = ref('')
 const filterToDate = ref('')
 const searchQuery = ref('')
 
-// Pagination
 const currentPage = ref(1)
 const itemsPerPage = ref(10)
 
-// Data
 const logs = ref<ReservationLog[]>([])
 const loadingLogs = ref(false)
 
-// Notification
 const notification = ref({
   show: false,
   message: '',
   success: false
 })
 
-// Computed properties
 const filteredLogs = computed(() => {
   let result = logs.value
 
-  // Apply lab filter if selected
   if (filterLab.value) {
     result = result.filter(log => log.labno === filterLab.value)
   }
 
-  // Apply status filter if selected
   if (filterStatus.value) {
     result = result.filter(log => log.status === filterStatus.value)
   }
 
-  // Apply date range filter if selected
   if (filterFromDate.value) {
     const fromDate = new Date(filterFromDate.value)
     result = result.filter(log => new Date(log.date) >= fromDate)
@@ -268,14 +259,11 @@ const filteredLogs = computed(() => {
     result = result.filter(log => new Date(log.date) <= toDate)
   }
 
-  // Apply search filter if query exists
   if (searchQuery.value.trim()) {
     const query = searchQuery.value.trim().toLowerCase()
     result = result.filter(log => {
-      // Check ID number
       if (String(log.idno).includes(query)) return true
       
-      // Check name combinations
       const fullName = `${log.firstname} ${log.middlename} ${log.lastname}`.toLowerCase()
       const nameCombinations = [
         `${log.firstname} ${log.lastname}`.toLowerCase(),
@@ -292,7 +280,6 @@ const filteredLogs = computed(() => {
   return result
 })
 
-// Methods
 const loadLogs = async () => {
   loadingLogs.value = true
   try {
@@ -316,17 +303,6 @@ const formatDate = (dateString: string) => {
   return new Date(dateString).toLocaleDateString(undefined, options)
 }
 
-const formatDateTime = (dateString: string) => {
-  const options: Intl.DateTimeFormatOptions = { 
-    year: 'numeric', 
-    month: 'short', 
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
-  }
-  return new Date(dateString).toLocaleDateString(undefined, options)
-}
-
 const showNotification = (message: string, success: boolean) => {
   notification.value = {
     show: true,
@@ -338,14 +314,12 @@ const showNotification = (message: string, success: boolean) => {
   }, 3000)
 }
 
-// Lifecycle hooks
 onMounted(() => {
   loadLogs()
 })
 </script>
 
 <style>
-/* Custom scrollbar for dark mode */
 ::-webkit-scrollbar {
   width: 8px;
 }
@@ -363,7 +337,6 @@ onMounted(() => {
   background: #6b7280;
 }
 
-/* Table styling */
 table {
   border-collapse: separate;
   border-spacing: 0;

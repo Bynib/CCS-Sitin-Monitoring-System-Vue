@@ -65,7 +65,6 @@ router.delete('/delete/:id', (req, res) => {
 })
 
 router.post('/add', (req, res) => {
-    // Access the object properties correctly
     const { id, idno, date, startTime, pcno, purpose, labno, origin } = req.body;
     
     if (!id || !idno || !date || !startTime || !purpose || !labno || !origin) {
@@ -74,7 +73,6 @@ router.post('/add', (req, res) => {
     
     console.log(`CREATE EVENT add_${id}_on_schedule ON SCHEDULE AT '${date} ${startTime}:00' DO INSERT INTO sitin (idno, purpose, laboratory, pcno, sitin_from) VALUES (${idno}, '${purpose}', '${labno}', '${pcno}', '${origin}')`);
     
-    // For security, use parameterized queries when you uncomment the DB code
     connection.query(
         `CREATE EVENT  insert_${id}_on_schedule ON SCHEDULE AT '${date} ${startTime}:00' DO INSERT INTO sitin (idno, purpose, laboratory, pcno, sitin_from) VALUES (?, ?, ?, ?, ?)`,
         [ idno, purpose, labno, pcno, origin],

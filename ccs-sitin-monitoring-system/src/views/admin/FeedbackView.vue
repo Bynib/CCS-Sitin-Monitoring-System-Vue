@@ -150,7 +150,6 @@ onMounted(async () => {
                     ]"
                   >
                     <div class="whitespace-pre-wrap break-words pb-6">
-                      <!-- Added pb-6 for button space -->
                       {{ sitin.feedback }}
                     </div>
                     <div

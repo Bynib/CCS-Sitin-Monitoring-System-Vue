@@ -148,7 +148,6 @@ const getMedalColor = (index: number) => {
     :announcement="announcement"
   />
 
-  <!-- Delete Confirmation Dialog -->
   <Dialog v-model:open="deleteDialogOpen">
     <DialogContent class="sm:max-w-[425px]">
       <DialogHeader>
@@ -169,7 +168,6 @@ const getMedalColor = (index: number) => {
   </Dialog>
 
   <div class="container mx-auto px-4 py-8 flex flex-col lg:flex-row gap-8 min-h-screen">
-    <!-- Leaderboard Section -->
     <div class="w-full lg:w-1/3">
       <Card>
         <CardHeader>

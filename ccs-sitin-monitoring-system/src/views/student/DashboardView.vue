@@ -47,7 +47,6 @@ onMounted(async () => {
 <template>
   <div class="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 p-6">
     <div class="container mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8">
-      <!-- Leaderboard Section -->
       <Card class="bg-gray-800/50 backdrop-blur-sm border-gray-700">
         <CardHeader>
           <CardTitle class="flex items-center gap-2 text-yellow-400">
@@ -118,7 +117,6 @@ onMounted(async () => {
         </CardContent>
       </Card>
 
-      <!-- Announcements Section -->
       <Card class="bg-gray-800/50 backdrop-blur-sm border-gray-700">
         <CardHeader>
           <CardTitle class="flex items-center gap-2">

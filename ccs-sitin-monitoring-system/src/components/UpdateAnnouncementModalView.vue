@@ -42,7 +42,6 @@ const handleEdit = async () => {
     emit('refreshAnnouncements')
   } catch (error) {
     console.error('Error updating announcement:', error)
-    // Consider using a toast notification here
     alert('Failed to update announcement. Please try again.')
   }
 }

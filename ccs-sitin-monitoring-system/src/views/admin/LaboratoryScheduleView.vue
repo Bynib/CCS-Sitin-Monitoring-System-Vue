@@ -65,7 +65,6 @@ const toggleSlot = async (lab: string, day: string, time: string) => {
     toast.error('Update failed', {
       description: 'Could not update the schedule'
     })
-    // Revert on error
     schedule.value[time][day] = schedule.value[time][day] === 'Open' ? 'Closed' : 'Open'
   }
 }
@@ -86,7 +85,6 @@ onBeforeMount(async () => {
         </CardHeader>
 
         <CardContent>
-          <!-- Lab Selection -->
           <Tabs v-model="selectedLab" class="w-full mb-6">
             <TabsList class="grid grid-cols-7 gap-2 h-auto bg-gray-800">
               <TabsTrigger 
@@ -101,7 +99,6 @@ onBeforeMount(async () => {
             </TabsList>
           </Tabs>
 
-          <!-- Schedule Table -->
           <div v-if="selectedLab && !isLoading" class="border border-gray-700 rounded-lg overflow-hidden">
             <div class="overflow-auto" style="max-height: 70vh;">
               <table class="w-full">
@@ -144,13 +141,11 @@ onBeforeMount(async () => {
             </div>
           </div>
 
-          <!-- Loading State -->
           <div v-if="isLoading" class="flex flex-col items-center justify-center py-12 gap-4">
             <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
             <p class="text-gray-400">Loading lab schedule...</p>
           </div>
 
-          <!-- Empty State -->
           <div v-if="!selectedLab && !isLoading" class="flex flex-col items-center justify-center py-12">
             <p class="text-xl text-gray-400">Please select a lab to view schedule</p>
           </div>

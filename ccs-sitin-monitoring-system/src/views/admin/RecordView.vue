@@ -106,11 +106,10 @@ const exportData = (format: 'pdf' | 'csv' | 'xlsx') => {
   switch (format) {
     case 'pdf':
       const doc = new jsPDF({
-        orientation: 'portrait', // Changed to portrait
+        orientation: 'portrait',
         unit: 'mm'
       })
       
-      // Title section
       doc.setFont('helvetica', 'bold')
       doc.setFontSize(16)
       doc.setTextColor(40, 40, 40)
@@ -120,7 +119,6 @@ const exportData = (format: 'pdf' | 'csv' | 'xlsx') => {
       doc.setFontSize(12)
       doc.text('COMPUTER LABORATORY SIT-IN MONITORING SYSTEM', 105, 29, { align: 'center' })
       
-      // Report details
       doc.setFontSize(10)
       doc.setFont('helvetica', 'normal')
       doc.text(`Report Type: ${filterMode.value === 'laboratory' ? 'Laboratory Records' : 'Purpose Records'}`, 15, 40)
@@ -128,8 +126,7 @@ const exportData = (format: 'pdf' | 'csv' | 'xlsx') => {
       doc.text(`Date Generated: ${new Date().toLocaleDateString()}`, 15, 52)
       doc.text(`Total Records: ${filteredSitins.value.length}`, 15, 58)
       
-      // Table with adjusted column widths for portrait
-      doc.setFontSize(8) // Smaller font size to fit portrait
+      doc.setFontSize(8)
       autoTable(doc, {
         startY: 65,
         head: [headers],
@@ -143,26 +140,25 @@ const exportData = (format: 'pdf' | 'csv' | 'xlsx') => {
           fillColor: [240, 240, 240]
         },
         styles: {
-          cellPadding: 2, // Smaller padding
-          fontSize: 8,   // Smaller font
+          cellPadding: 2,
+          fontSize: 8,
           overflow: 'linebreak',
-          lineWidth: 0.1 // Thinner lines
+          lineWidth: 0.1
         },
         columnStyles: {
-          0: { cellWidth: 15 }, // ID Number
-          1: { cellWidth: 25 }, // Name
-          2: { cellWidth: 20 }, // Course
-          3: { cellWidth: 10 }, // Year
-          4: { cellWidth: 25 }, // Purpose
-          5: { cellWidth: 12 }, // Lab
-          6: { cellWidth: 20 }, // Time In
-          7: { cellWidth: 20 }  // Time Out
+          0: { cellWidth: 15 },
+          1: { cellWidth: 25 },
+          2: { cellWidth: 20 },
+          3: { cellWidth: 10 },
+          4: { cellWidth: 25 },
+          5: { cellWidth: 12 },
+          6: { cellWidth: 20 },
+          7: { cellWidth: 20 }
         },
         margin: { top: 65 },
-        tableWidth: 'wrap' // Let the table determine its width
+        tableWidth: 'wrap'
       })
       
-      // Footer
       const pageCount = doc.getNumberOfPages()
       for (let i = 1; i <= pageCount; i++) {
         doc.setPage(i)
@@ -211,7 +207,6 @@ onMounted(async () => {
       </CardHeader>
       <CardContent>
         <div class="flex flex-col gap-6">
-          <!-- Filter Controls -->
           <div class="flex flex-col sm:flex-row items-center gap-4">
             <Tabs v-model="filterMode" class="w-full sm:w-auto">
               <TabsList>
@@ -251,7 +246,6 @@ onMounted(async () => {
             </div>
           </div>
 
-          <!-- Records Table -->
           <ScrollArea class="h-[calc(100vh-220px)] rounded-md border">
             <Table v-if="filteredSitins.length">
               <TableHeader class="bg-muted/50">

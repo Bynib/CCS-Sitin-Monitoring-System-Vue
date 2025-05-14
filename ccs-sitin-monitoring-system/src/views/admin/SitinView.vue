@@ -1,10 +1,8 @@
 <script setup lang="ts">
-import { getStudent } from '../../../api/student'
 import { updatePCAvailability } from '../../../api/pc'
 import { getSitin, updateSitinTime } from '../../../api/sitin'
 import { updateSession } from '../../../api/student'
 import { ref, onMounted, computed } from 'vue'
-import { useRouter } from 'vue-router'
 import {
   Table,
   TableBody,
@@ -30,7 +28,6 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { Badge } from '@/components/ui/badge'
 import { CalendarClock } from 'lucide-vue-next'
 
-const router = useRouter()
 const searchQuery = ref('')
 
 interface Sitin {
@@ -204,7 +201,6 @@ const formatDateTime = (dateString: string) => {
       </CardContent>
     </Card>
 
-    <!-- Logout Confirmation Dialog -->
     <AlertDialog v-model:open="logoutDialogOpen">
       <AlertDialogContent>
         <AlertDialogHeader>

@@ -13,7 +13,7 @@ import { toast } from 'vue-sonner'
 const selectedFile = ref<File | null>(null)
 const uploading = ref(false)
 const uploadProgress = ref(0)
-const MAX_FILE_SIZE = 45 * 1024 * 1024 // 45MB
+const MAX_FILE_SIZE = 45 * 1024 * 1024
 
 interface FileDetails {
   id: number

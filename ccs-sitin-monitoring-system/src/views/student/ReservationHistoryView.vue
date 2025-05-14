@@ -5,9 +5,7 @@
         My Reservation History
       </h1>
 
-      <!-- Filter Controls (Simplified for student view) -->
       <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <!-- Status Filter -->
         <div class="space-y-2">
           <label class="block text-sm font-medium text-gray-300">Filter by Status</label>
           <select
@@ -21,7 +19,6 @@
           </select>
         </div>
 
-        <!-- Date Range Filters -->
         <div class="space-y-2">
           <label class="block text-sm font-medium text-gray-300">From Date</label>
           <input
@@ -39,7 +36,6 @@
           />
         </div>
 
-        <!-- Search by PC Number -->
         <div class="space-y-2">
           <label class="block text-sm font-medium text-gray-300">Search PC Number</label>
           <input
@@ -51,7 +47,6 @@
         </div>
       </div>
 
-      <!-- Logs Table -->
       <div class="overflow-x-auto rounded-lg border border-gray-700">
         <table class="min-w-full divide-y divide-gray-700">
           <thead class="bg-gray-750">
@@ -125,7 +120,6 @@
         </table>
       </div>
 
-      <!-- Pagination -->
       <div class="flex items-center justify-between mt-4">
         <div class="text-sm text-gray-400">
           Showing <span class="font-medium">{{ (currentPage - 1) * itemsPerPage + 1 }}</span> to 
@@ -150,7 +144,6 @@
         </div>
       </div>
 
-      <!-- Notification -->
       <div 
         v-if="notification.show" 
         class="fixed bottom-4 right-4 p-4 rounded-md shadow-lg border"
@@ -193,7 +186,6 @@ interface ReservationLog {
 
 const studentStore = useStudentStore()
 
-// Laboratory data
 const laboratories = ref([
   { id: '517', name: 'Lab 517' },
   { id: '522', name: 'Lab 522' },
@@ -205,41 +197,33 @@ const laboratories = ref([
   { id: '544', name: 'Lab 544' }
 ])
 
-// Filter controls
 const filterStatus = ref('')
 const filterFromDate = ref('')
 const filterToDate = ref('')
 const searchPcNumber = ref('')
 
-// Pagination
 const currentPage = ref(1)
 const itemsPerPage = ref(10)
 
-// Data
 const logs = ref<ReservationLog[]>([])
 const loadingLogs = ref(false)
 const processingCancellation = ref<string | null>(null)
 
-// Notification
 const notification = ref({
   show: false,
   message: '',
   success: false
 })
 
-// Computed properties
 const filteredLogs = computed(() => {
   let result = logs.value
 
-  // Filter by current student
   result = result.filter(log => log.idno === studentStore.student.idNo)
 
-  // Apply status filter if selected
   if (filterStatus.value) {
     result = result.filter(log => log.status === filterStatus.value)
   }
 
-  // Apply date range filter if selected
   if (filterFromDate.value) {
     const fromDate = new Date(filterFromDate.value)
     result = result.filter(log => new Date(log.date) >= fromDate)
@@ -251,13 +235,11 @@ const filteredLogs = computed(() => {
     result = result.filter(log => new Date(log.date) <= toDate)
   }
 
-  // Apply PC number search
   if (searchPcNumber.value.trim()) {
     const query = searchPcNumber.value.trim().toLowerCase()
     result = result.filter(log => String(log.pcno).toLowerCase().includes(query))
   }
 
-  // Sort by date (newest first)
   return result.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
 })
 
@@ -270,7 +252,6 @@ const hasActiveFilters = computed(() => {
   return filterStatus.value || filterFromDate.value || filterToDate.value || searchPcNumber.value.trim()
 })
 
-// Methods
 const loadLogs = async () => {
   loadingLogs.value = true
   try {
@@ -302,28 +283,7 @@ const canCancel = (log: ReservationLog) => {
   const reservationDate = new Date(log.date)
   const now = new Date()
   
-  // Can cancel if status is pending or approved and date is in the future
   return (log.status === 'pending' || log.status === 'approved') && reservationDate > now
-}
-
-// const cancelReservation = async (reservationId: string) => {
-//   processingCancellation.value = reservationId
-//   try {
-//     await apiCancelReservation(reservationId)
-//     showNotification('Reservation cancelled successfully', true)
-//     await loadLogs() // Refresh the list
-//   } catch (error) {
-//     console.error('Error cancelling reservation:', error)
-//     showNotification('Failed to cancel reservation', false)
-//   } finally {
-//     processingCancellation.value = null
-//   }
-// }
-
-const viewDetails = (log: ReservationLog) => {
-  // You can implement a modal or redirect to a details page
-  console.log('View details for:', log)
-  showNotification('Showing reservation details', true)
 }
 
 const showNotification = (message: string, success: boolean) => {
@@ -337,14 +297,12 @@ const showNotification = (message: string, success: boolean) => {
   }, 3000)
 }
 
-// Lifecycle hooks
 onMounted(() => {
   loadLogs()
 })
 </script>
 
 <style>
-/* Custom scrollbar for dark mode */
 ::-webkit-scrollbar {
   width: 8px;
 }
@@ -362,7 +320,6 @@ onMounted(() => {
   background: #6b7280;
 }
 
-/* Table styling */
 table {
   border-collapse: separate;
   border-spacing: 0;

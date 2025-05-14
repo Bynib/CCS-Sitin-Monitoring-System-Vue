@@ -4,7 +4,6 @@ import { getSitin } from '../../../api/sitin'
 import { useStudentStore } from '@/stores/student.store'
 import FeedbackModalView from '@/components/FeedbackModalView.vue'
 
-// Shadcn components
 import {
   Card,
   CardHeader,
@@ -72,10 +71,9 @@ const handleButtonClick = (sitin_id: number, laboratory: number) => {
 
 const handleFeedbackSubmitted = () => {
   openFeedbackDialog.value = false
-  // Refresh the data after submission
   const updatedSitin = sitins.value.find(s => s.sitin_id === id.sitin_id)
   if (updatedSitin) {
-    updatedSitin.feedback = "Submitted" // Or update with actual feedback content
+    updatedSitin.feedback = "Submitted"
   }
 }
 

@@ -54,14 +54,12 @@ import {
   CardHeader,
   CardTitle,
   CardContent,
-  CardFooter,
   CardDescription
 } from '@/components/ui/card'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert'
-import { Info, FileText } from 'lucide-vue-next'
+import { Info } from 'lucide-vue-next'
 
 const rules = [
   {

@@ -2,7 +2,6 @@
 import { getFiles } from '@/../api/file'
 import { onMounted, ref } from 'vue'
 
-// Shadcn components
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -150,7 +149,6 @@ onMounted(async () => {
       </CardContent>
     </Card>
 
-    <!-- Preview Dialog -->
     <Dialog v-model:open="isPreviewOpen">
       <DialogContent class="max-w-4xl max-h-[90vh]">
         <DialogHeader>

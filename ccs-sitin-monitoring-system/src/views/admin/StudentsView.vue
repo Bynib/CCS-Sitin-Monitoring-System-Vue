@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { getStudents } from '@/../api/student'
 import { ref, onMounted, computed } from 'vue'
-import { useRouter } from 'vue-router'
 import { updateAll } from '@/../api/student'
 import { Button } from '@/components/ui/button'
 import {
@@ -35,7 +34,6 @@ interface Student {
 }
 
 const students = ref<Student[]>([])
-const router = useRouter()
 const isResetDialogOpen = ref(false)
 const searchQuery = ref('')
 const selectedStudent = ref<Student | null>(null)
@@ -67,9 +65,7 @@ const filteredStudents = computed(() => {
   
   const query = searchQuery.value.trim().toLowerCase()
   return students.value.filter(student => {
-    // Check ID number
     if (String(student.idno).includes(query)) return true
-    // Check name combinations
     const fullName = `${student.firstname} ${student.middlename} ${student.lastname}`.toLowerCase()
     const nameCombinations = [
       `${student.firstname} ${student.lastname}`.toLowerCase(),
@@ -181,7 +177,6 @@ const openSitinModal = (student: Student) => {
       </CardContent>
     </Card>
 
-    <!-- Reset Confirmation Dialog -->
     <AlertDialog v-model:open="isResetDialogOpen">
       <AlertDialogContent>
         <AlertDialogHeader>
@@ -199,7 +194,6 @@ const openSitinModal = (student: Student) => {
       </AlertDialogContent>
     </AlertDialog>
 
-    <!-- Sit-in Modal -->
     <SitinStudentModalView
       v-if="showSitinModal && selectedStudent"
       :student="selectedStudent"

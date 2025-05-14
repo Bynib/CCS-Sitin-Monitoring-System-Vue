@@ -13,12 +13,10 @@ router.get("/", (req, res) => {
 router.put('/update', (req, res) => {
     const { pcno, labno, status } = req.body;
     
-    // Validate input
     if (!pcno || !labno || !status) {
         return res.status(400).json({ error: "pcno, labno, and status are required" });
     }
 
-    // Check if status is valid (assuming status can be 'available' or 'unavailable')
     if (status !== 'available' && status !== 'unavailable') {
         return res.status(400).json({ error: "status must be either 'available' or 'unavailable'" });
     }
@@ -41,7 +39,6 @@ router.put('/update', (req, res) => {
     );
 });
 
-//get availble pc by labno
 router.get('/available/:labno', (req, res) => {
     const labno = req.params.labno;
     connection.query("SELECT * FROM pc WHERE labno = ? AND status = 'available'", [labno], (err, rows, fields) => {

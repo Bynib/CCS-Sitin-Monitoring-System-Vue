@@ -30,7 +30,6 @@ const createAnnouncement = async () => {
     emit('refreshAnnouncements')  
   } catch (error) {
     console.error('Error:', error)
-    // Consider using a toast notification here instead of alert
     alert('Failed to create announcement. Please try again.')
   }
 }

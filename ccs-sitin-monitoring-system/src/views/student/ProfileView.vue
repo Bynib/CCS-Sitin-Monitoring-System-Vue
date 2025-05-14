@@ -4,7 +4,6 @@ import { useStudentStore } from '@/stores/student.store'
 import { updateStudent } from '../../../api/student'
 import { toast } from 'vue-sonner'
 
-// Shadcn components
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -86,7 +85,6 @@ const handleSubmitEdit = async () => {
 
       <CardContent>
         <div class="flex flex-col md:flex-row gap-8 items-center md:items-start">
-          <!-- Avatar Section -->
           <div class="flex flex-col items-center gap-4 w-full md:w-auto">
             <Avatar class="h-40 w-40">
               <AvatarImage src="@/assets/avatar.jpeg" />
@@ -104,7 +102,6 @@ const handleSubmitEdit = async () => {
             </div>
           </div>
 
-          <!-- Form Section -->
           <div class="grid grid-cols-1 gap-4 w-full">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div class="space-y-2">

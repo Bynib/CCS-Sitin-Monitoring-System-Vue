@@ -5,9 +5,7 @@
         Computer Lab Reservation Management
       </h1>
 
-      <!-- Filter Controls -->
       <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <!-- Lab Filter -->
         <div class="space-y-2">
           <label class="block text-sm font-medium text-gray-300">Filter by Lab</label>
           <select
@@ -21,7 +19,6 @@
           </select>
         </div>
 
-        <!-- Search -->
         <div class="space-y-2">
           <label class="block text-sm font-medium text-gray-300">Search</label>
           <input
@@ -33,7 +30,6 @@
         </div>
       </div>
 
-      <!-- Reservations Table -->
       <div class="overflow-x-auto rounded-lg border border-gray-700">
         <table class="min-w-full divide-y divide-gray-700">
           <thead class="bg-gray-750">
@@ -136,7 +132,6 @@
         </table>
       </div>
 
-      <!-- Pagination -->
       <div class="flex items-center justify-between mt-4">
         <div class="text-sm text-gray-400">
           Showing <span class="font-medium">{{ (currentPage - 1) * itemsPerPage + 1 }}</span> to 
@@ -161,7 +156,6 @@
         </div>
       </div>
 
-      <!-- Reservation Details Modal -->
       <div v-if="selectedReservation" class="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
         <div class="bg-gray-800 rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
           <div class="p-6">
@@ -175,7 +169,6 @@
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <!-- Student Information -->
               <div class="space-y-4">
                 <h3 class="text-lg font-medium text-white border-b border-gray-700 pb-2">
                   Student Information
@@ -202,7 +195,6 @@
                 </div>
               </div>
 
-              <!-- Reservation Details -->
               <div class="space-y-4">
                 <h3 class="text-lg font-medium text-white border-b border-gray-700 pb-2">
                   Reservation Details
@@ -230,7 +222,6 @@
               </div>
             </div>
 
-            <!-- Action Buttons -->
             <div class="flex justify-end space-x-3 mt-6">
               <button
                 @click="confirmDecline(selectedReservation)"
@@ -251,7 +242,6 @@
         </div>
       </div>
 
-      <!-- Confirmation Dialog -->
       <div v-if="showConfirmationDialog" class="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
         <div class="bg-gray-800 rounded-lg shadow-xl max-w-md w-full">
           <div class="p-6">
@@ -293,7 +283,6 @@
         </div>
       </div>
 
-      <!-- Notification -->
       <div 
         v-if="notification.show" 
         class="fixed bottom-4 right-4 p-4 rounded-md shadow-lg border"
@@ -346,7 +335,6 @@ interface Reservation {
   status: string
 }
 
-// Laboratory data
 const laboratories = ref([
   { id: '517', name: 'Lab 517' },
   { id: '522', name: 'Lab 522' },
@@ -358,49 +346,39 @@ const laboratories = ref([
   { id: '544', name: 'Lab 544' }
 ])
 
-// Filter controls
 const filterLab = ref('')
 const searchQuery = ref('')
 
-// Pagination
 const currentPage = ref(1)
 const itemsPerPage = ref(10)
 
-// Data
 const reservations = ref<Reservation[]>([])
 const loadingReservations = ref(false)
 const selectedReservation = ref<Reservation | null>(null)
 const processingAction = ref(false)
 
-// Confirmation dialog
 const showConfirmationDialog = ref(false)
 const confirmationAction = ref<'approve' | 'decline'>('approve')
 const selectedReservationForAction = ref<Reservation | null>(null)
 
-// Notification
 const notification = ref({
   show: false,
   message: '',
   success: false
 })
 
-// Computed properties
 const filteredReservations = computed(() => {
   let result = reservations.value
 
-  // Apply lab filter if selected
   if (filterLab.value) {
     result = result.filter(reservation => reservation.labno === filterLab.value)
   }
 
-  // Apply search filter if query exists
   if (searchQuery.value.trim()) {
     const query = searchQuery.value.trim().toLowerCase()
     result = result.filter(reservation => {
-      // Check ID number
       if (String(reservation.idno).includes(query)) return true
       
-      // Check name combinations
       const fullName = `${reservation.firstname} ${reservation.middlename} ${reservation.lastname}`.toLowerCase()
       const nameCombinations = [
         `${reservation.firstname} ${reservation.lastname}`.toLowerCase(),
@@ -417,12 +395,10 @@ const filteredReservations = computed(() => {
   return result
 })
 
-// Methods
 const loadReservations = async () => {
   loadingReservations.value = true
   try {
     const data = await getReservations()
-    // Filter for reservations with null status (pending)
     reservations.value = data.filter((reservation: Reservation) => reservation.status == null)
   } catch (error) {
     console.error('Error loading reservations:', error)
@@ -490,10 +466,8 @@ const executeAction = async () => {
       showNotification('Reservation declined', true)
     }
 
-    // Reload reservations after action
     await loadReservations()
 
-    // Close details modal if open
     if (selectedReservation.value?.id === selectedReservationForAction.value?.id) {
       selectedReservation.value = null
     }
@@ -526,14 +500,12 @@ const showNotification = (message: string, success: boolean) => {
   }, 3000)
 }
 
-// Lifecycle hooks
 onMounted(() => {
   loadReservations()
 })
 </script>
 
 <style>
-/* Custom scrollbar for dark mode */
 ::-webkit-scrollbar {
   width: 8px;
 }
@@ -551,7 +523,6 @@ onMounted(() => {
   background: #6b7280;
 }
 
-/* Table styling */
 table {
   border-collapse: separate;
   border-spacing: 0;

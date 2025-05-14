@@ -5,7 +5,6 @@
           PC Availability Management
         </h1>
   
-        <!-- Laboratory Selection -->
         <div class="mb-8 space-y-2">
           <label class="block text-sm font-medium text-gray-300">Select Laboratory</label>
           <select 
@@ -24,13 +23,11 @@
           </select>
         </div>
   
-        <!-- Loading State -->
         <div v-if="loading" class="text-center py-12">
           <div class="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500 mx-auto"></div>
           <p class="mt-4 text-gray-400">Loading PCs...</p>
         </div>
   
-        <!-- PC Grid -->
         <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           <div 
             v-for="pc in pcs" 
@@ -55,14 +52,9 @@
                 {{ pc.status.toUpperCase() }}
               </span>
             </div>
-            <div class="mt-3 space-y-1">
-              <!-- <p class="text-sm text-gray-400">ID: {{ pc.pcno }}</p> -->
-              <!-- <p class="text-sm text-gray-400"> {{ getLabNumber(pc.labno) }}</p> -->
-            </div>
           </div>
         </div>
   
-        <!-- Update Button -->
         <button 
           v-if="selectedPC"
           @click="updateAvailability"
@@ -84,7 +76,6 @@
           </span>
         </button>
   
-        <!-- Notification -->
         <transition
           enter-active-class="transition ease-out duration-300"
           enter-from-class="transform opacity-0 translate-y-2"
@@ -120,7 +111,6 @@
   import { onMounted, ref, watch } from 'vue'
   import { getPC, updatePCAvailability } from '@/../api/pc'
   
-  // Laboratory data
   const laboratories = ref([
     { id: '517', name: 'Lab 517' },
     { id: '522', name: 'Lab 522' },
@@ -138,7 +128,6 @@
     status: string
   }
   
-  // Reactive state
   const selectedLab = ref('517')
   const pcs = ref<PC[]>([])
   const loading = ref(false)
@@ -151,7 +140,6 @@
     success: false
   })
   
-  // Fetch PCs when lab selection changes
   watch(selectedLab, async (newVal) => {
     if (!newVal) return
     
@@ -159,7 +147,6 @@
     try {
       const response = await getPC()
       console.log("response: ",response)
-      // Filter PCs by selected lab
       pcs.value = response.filter((pc:PC) => pc.labno === selectedLab.value)
     } catch (error) {
       console.error('Error fetching PCs:', error)
@@ -169,7 +156,6 @@
     }
   })
   
-  // Methods
   const toggleAvailability = (pc:PC) => {
     selectedPC.value = pc.pcno
     selectedPCStatus.value = pc.status
@@ -183,7 +169,6 @@
       const newStatus = selectedPCStatus.value.toLowerCase() === 'available' ? 'unavailable' : 'available'
       await updatePCAvailability(Number(selectedPC.value),Number(selectedLab.value), newStatus)
       
-      // Update local state
       const pcIndex = pcs.value.findIndex(pc => pc.pcno === selectedPC.value)
       if (pcIndex !== -1) {
         pcs.value[pcIndex].status = newStatus
@@ -199,10 +184,6 @@
     }
   }
   
-  const getLabNumber = (labno: string) => {
-    const lab = laboratories.value.find(l => l.id === labno)
-    return lab ? lab.name : 'Unknown Lab'
-  }
   
   const showNotification = (message:string, success:boolean) => {
     notification.value = {
@@ -228,12 +209,10 @@
   </script>
   
   <style>
-  /* Smooth scroll behavior */
   html {
     scroll-behavior: smooth;
   }
   
-  /* Custom scrollbar */
   ::-webkit-scrollbar {
     width: 8px;
     height: 8px;

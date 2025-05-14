@@ -5,14 +5,10 @@ import { updateSession, updatePoint, getStudent } from '../../api/student'
 import { updateSitinTime } from '../../api/sitin'
 
 import { findSitin } from '../../api/sitin'
-import StudentsView from '@/views/admin/StudentsView.vue'
 
 const emit = defineEmits(['close'])
 const addPoint = ref(false)
 
-// const idno = ref('')
-const purpose = ref('')
-const laboratory = ref('')
 
 interface Student {
   idno: string
@@ -48,8 +44,6 @@ onMounted(async () => {
 })
 
 const handleLogout = async (sitin_id: number, idno: string) => {
-  //   console.log(addPoint.value)
-  //   return
   const confirmLogout = confirm('Confirm Student Logout')
   if (confirmLogout) {
     if (addPoint.value === true) {
@@ -69,35 +63,9 @@ const handleLogout = async (sitin_id: number, idno: string) => {
 }
 
 console.log('Values 2', sitins.value)
-// const handleSitin = async () => {
-//   const student = {
-//     idno: Number(props.student.idno),
-//     purpose: purpose.value,
-//     laboratory: Number(laboratory.value)
-//   };
-
-//   try {
-//     const result = await addSitin(student);
-//     if(!result.success){
-//       // alert('Student is currently sitting in and has not logged out!');
-//       // window.location.reload()
-//       isDisabled.value = true;
-//       console.log(isDisabled)
-//       return;
-//     }
-//     purpose.value = '';
-//     laboratory.value = '';
-//     alert('Student sitin added successfully');
-//     window.location.reload()
-//     // sitins.value = await findSitin(props.student.idno); // Refresh the data
-//   } catch (error) {
-//     console.error("Error adding sitin:", error);
-//     alert('Failed to add sitin');
-//   }
-// };
 
 const handleCancel = () => {
-  emit('close') // Go back to the previous page
+  emit('close')
 }
 </script>
 
@@ -159,7 +127,6 @@ const handleCancel = () => {
           :disabled="isDisabled"
         >
           Logout
-          <!-- Sitin -->
         </button>
         <button
           type="button"

@@ -13,7 +13,6 @@
     </SidebarHeader>
 
     <SidebarContent>
-      <!-- Admin Navigation -->
       <SidebarGroup v-if="isAdmin">
         <SidebarGroupLabel>Administration</SidebarGroupLabel>
         <SidebarGroupContent>
@@ -28,7 +27,6 @@
                     'hover:bg-[#333]': !isActive(link.to),
                   }"
                 >
-                  <!-- w-full bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-bold transition-colors -->
                   <component :is="link.icon" class="h-5 w-5" />
                   <span>{{ link.label }}</span>
                 </RouterLink>
@@ -38,7 +36,6 @@
         </SidebarGroupContent>
       </SidebarGroup>
 
-      <!-- Student Navigation -->
       <SidebarGroup v-else>
         <SidebarGroupLabel>Student</SidebarGroupLabel>
         <SidebarGroupContent>
@@ -86,7 +83,6 @@
       </SidebarGroup>
     </SidebarContent>
 
-    <!-- Notification Dialog - Updated Version -->
     <div
       v-if="showNotifications"
       class="fixed inset-0 z-40 bg-black/50 flex justify-center"
@@ -116,7 +112,6 @@
         </div>
 
         <div v-else>
-          <!-- Unread Notifications Section -->
           <div v-if="unreadNotifications.length > 0">
             <div class="px-4 py-2 bg-[#333]/50 text-sm font-medium sticky top-0 z-10 text-center">
               Unread Notifications
@@ -156,7 +151,6 @@
             </div>
           </div>
 
-          <!-- Read Notifications Section -->
           <div v-if="readNotifications.length > 0">
             <div class="px-4 py-2 bg-[#333]/50 text-sm font-medium sticky top-0 z-10 text-center">
               Read Notifications
@@ -239,12 +233,10 @@ import {
   File,
   AlertCircle,
   LogOut,
-  Menu,
   Users,
   FileText,
   MessageSquare,
   Upload,
-  Megaphone,
   CalendarCheck,
   LaptopMinimal,
   Bell,
@@ -263,7 +255,6 @@ import {
   SidebarHeader,
 } from '@/components/ui/sidebar'
 import {
-  findNotification,
   getNotifications,
   removeNotification,
   updateAllNotificationStatus,
@@ -296,7 +287,6 @@ const notifications = ref<Notification[]>([])
 const toggleNotifications = () => {
   showNotifications.value = !showNotifications.value
 
-  // Here you would typically fetch notifications when opened
   if (showNotifications.value) {
     getNotifications()
   }
@@ -310,7 +300,6 @@ const readNotifications = computed(() => {
 })
 
 const markAllAsRead = async () => {
-  // console.log(Number(studentStore.student.idNo))
   try {
     await updateAllNotificationStatus(Number(studentStore.student.idNo))
     notifications.value = await getNotifications()
@@ -338,22 +327,17 @@ const markNotification = async (notif_id: number) => {
   if (markingAsRead.value) return
   markingAsRead.value = true
   try {
-    // Find the current notification
     const notification = notifications.value.find((n) => n.notif_id === notif_id)
     if (!notification) return
 
-    // Toggle the status
     const newStatus = notification.status === 'unread' ? 'read' : 'unread'
 
-    // Update in backend
     await updateNotificationStatus(notif_id, newStatus)
 
-    // Update local state
     notification.status = newStatus
     unreadCount.value = notifications.value.filter((n) => n.status === 'unread').length
   } catch (error) {
     console.error('Failed to update notification status:', error)
-    // You might want to show an error message to the user here
   } finally {
     markingAsRead.value = false
   }
@@ -365,21 +349,16 @@ const deleteNotification = async (notif_id: number) => {
   deletingNotification.value = true
 
   try {
-    // First find the index of the notification to delete
     const index = notifications.value.findIndex((n) => n.notif_id === notif_id)
     if (index === -1) return
 
-    // Call your API to delete the notification
     await removeNotification(notif_id)
 
-    // Remove from local state
     notifications.value.splice(index, 1)
 
-    // Update unread count
     unreadCount.value = notifications.value.filter((n) => n.status === 'unread').length
   } catch (error) {
     console.error('Failed to delete notification:', error)
-    // You might want to show an error message to the user here
   } finally {
     deletingNotification.value = false
   }
