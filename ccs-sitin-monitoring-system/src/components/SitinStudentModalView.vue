@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { addSitin, findSitin } from '../../api/sitin'
-import { ref, defineEmits, onMounted, computed } from 'vue'
+import { getAvailablePCs } from '../../api/reservation'
+import { updatePCAvailability } from '../../api/pc'
+import { ref, defineEmits, onMounted, computed, watch } from 'vue'
 import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -19,7 +21,6 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
 
-// Define both close and sitin-success events
 const emit = defineEmits<{
   (e: 'close'): void
   (e: 'sitin-success'): void
@@ -43,6 +44,13 @@ interface Sitin {
   laboratory: string
   date: string
   loggedout: string
+  origin: string
+}
+
+interface PC {
+  pcno: number
+  labno: number
+  status: string
 }
 
 const props = defineProps<{
@@ -51,7 +59,10 @@ const props = defineProps<{
 
 const purpose = ref('')
 const laboratory = ref('')
+const pcno = ref('')
 const sitins = ref<Sitin[]>([])
+const availablePCs = ref<PC[]>([])
+const loadingPCs = ref(false)
 const isDisabled = ref(false)
 const errorMessage = ref('')
 const formError = ref('')
@@ -76,7 +87,7 @@ const purposes = [
 const laboratories = [517, 524, 526, 528, 530, 542, 544]
 
 const isFormValid = computed(() => {
-  return purpose.value && laboratory.value && !isDisabled.value
+  return purpose.value && laboratory.value && pcno.value && !isDisabled.value
 })
 
 onMounted(async () => {
@@ -87,9 +98,34 @@ onMounted(async () => {
   }
 })
 
+const fetchAvailablePCs = async () => {
+  if (!laboratory.value) return
+  
+  loadingPCs.value = true
+  try {
+    const response = await getAvailablePCs(Number(laboratory.value))
+    availablePCs.value = response
+    pcno.value = ''
+  } catch (error) {
+    console.error('Error fetching available PCs:', error)
+    formError.value = 'Failed to fetch available computers'
+  } finally {
+    loadingPCs.value = false
+  }
+}
+
+watch(laboratory, (newVal) => {
+  if (newVal) {
+    fetchAvailablePCs()
+  } else {
+    availablePCs.value = []
+    pcno.value = ''
+  }
+})
+
 const confirmSitin = () => {
   if (!isFormValid.value) {
-    formError.value = 'Please select both purpose and laboratory'
+    formError.value = 'Please select purpose, laboratory and PC number'
     return
   }
   showConfirmDialog.value = true
@@ -102,18 +138,22 @@ const handleSitin = async () => {
   const student = {
     idno: Number(props.student.idno),
     purpose: purpose.value,
-    laboratory: Number(laboratory.value)
+    laboratory: Number(laboratory.value),
+    pcno: Number(pcno.value),
+    origin: "walk-in"
   };
 
+    console.log("to sitin: ",student)
   try {
     const result = await addSitin(student);
+    await updatePCAvailability(Number(pcno.value), Number(laboratory.value), 'unavailable')
     if (!result.success) {
       errorMessage.value = 'Student is currently sitting in and has not logged out!'
       isDisabled.value = true
       return
     }
     emit('close')
-    emit('sitin-success') // Notify parent to refresh data
+    emit('sitin-success')
   } catch (error) {
     console.error("Error adding sitin:", error);
     errorMessage.value = 'Failed to add sit-in'
@@ -218,6 +258,37 @@ const handleCancel = () => {
               </SelectContent>
             </Select>
           </div>
+
+          <!-- PC Selection -->
+          <div class="space-y-2" v-if="laboratory">
+            <label for="pcno" class="text-sm font-medium">PC Number <span class="text-red-500">*</span></label>
+            <div v-if="loadingPCs" class="text-center py-2">
+              <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-500 mx-auto"></div>
+              <p class="mt-1 text-xs text-muted-foreground">Loading available PCs...</p>
+            </div>
+            <Select 
+              v-else
+              v-model="pcno" 
+              :disabled="availablePCs.length === 0 || isDisabled"
+              required
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select PC number" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem 
+                  v-for="pc in availablePCs" 
+                  :key="pc.pcno" 
+                  :value="String(pc.pcno)"
+                >
+                  PC {{ pc.pcno }}
+                </SelectItem>
+                <div v-if="availablePCs.length === 0" class="text-center py-2 text-sm text-muted-foreground">
+                  No available PCs in this lab
+                </div>
+              </SelectContent>
+            </Select>
+          </div>
         </div>
 
         <!-- Buttons -->
@@ -251,6 +322,7 @@ const handleCancel = () => {
             <p><strong>Student:</strong> {{ student.lastname }}, {{ student.firstname }} ({{ student.idno }})</p>
             <p><strong>Purpose:</strong> {{ purpose }}</p>
             <p><strong>Laboratory:</strong> Lab {{ laboratory }}</p>
+            <p><strong>PC Number:</strong> PC {{ pcno }}</p>
           </div>
         </AlertDialogDescription>
       </AlertDialogHeader>

@@ -31,6 +31,7 @@ interface Sitin {
   yearlevel: number
   purpose: string
   laboratory: number
+  pcno: number
   date: string
   LoggedOut: string
 }
@@ -261,6 +262,7 @@ onMounted(async () => {
                   <TableHead>Year</TableHead>
                   <TableHead>Purpose</TableHead>
                   <TableHead>Lab</TableHead>
+                  <TableHead>PC</TableHead>
                   <TableHead>Time In</TableHead>
                   <TableHead>Time Out</TableHead>
                 </TableRow>
@@ -282,6 +284,7 @@ onMounted(async () => {
                   </TableCell>
                   <TableCell class="max-w-[200px] truncate">{{ sitin.purpose }}</TableCell>
                   <TableCell>Lab {{ sitin.laboratory }}</TableCell>
+                  <TableCell>{{ sitin.pcno }}</TableCell>
                   <TableCell>
                     <div class="flex items-center gap-2">
                       <CalendarClock class="w-4 h-4 text-muted-foreground" />

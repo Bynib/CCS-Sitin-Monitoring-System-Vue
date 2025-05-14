@@ -7,7 +7,8 @@ import recordRoute from './routes/record.route.js';
 import fileRoute from './routes/file.route.js';
 import scheduleRoute from './routes/lab_sched.route.js';
 import pcRoute from './routes/pc.route.js';
-import reservationRoute from './routes/reservation.route.js';   
+import reservationRoute from './routes/reservation.route.js';  
+import notificationRoute from './routes/notification.route.js'; 
 import bodyParser from 'body-parser';
 
 
@@ -27,6 +28,7 @@ app.use('/file', fileRoute);
 app.use('/schedule', scheduleRoute);
 app.use('/pc', pcRoute);
 app.use('/reservation', reservationRoute);
+app.use('/notification', notificationRoute);
 
 const port = process.env.PORT || 3000;
 

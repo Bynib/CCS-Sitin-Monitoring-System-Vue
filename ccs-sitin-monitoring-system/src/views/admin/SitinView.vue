@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { getStudent } from '../../../api/student'
+import { updatePCAvailability } from '../../../api/pc'
 import { getSitin, updateSitinTime } from '../../../api/sitin'
 import { updateSession } from '../../../api/student'
 import { ref, onMounted, computed } from 'vue'
@@ -45,6 +46,7 @@ interface Sitin {
   date: string
   LoggedOut: string | null
   points: string
+  pcno: number
 }
 
 const sitins = ref<Sitin[]>([])
@@ -53,6 +55,7 @@ const logoutDialogOpen = ref(false)
 
 onMounted(async () => {
   await fetchSitins()
+  console.log(sitins.value)
 })
 
 const fetchSitins = async () => {
@@ -73,6 +76,7 @@ const handleSitinLogout = async () => {
   try {
     await updateSession(currentSitin.value.idno)
     await updateSitinTime(currentSitin.value.sitin_id)
+    await updatePCAvailability(Number(currentSitin.value.pcno), Number(currentSitin.value.laboratory), 'available')
     await fetchSitins()
     logoutDialogOpen.value = false
   } catch (error) {
@@ -91,7 +95,8 @@ const filteredSitins = computed(() => {
       sitin.lastname.toLowerCase().includes(query) ||
       sitin.course.toLowerCase().includes(query) ||
       sitin.purpose.toLowerCase().includes(query) ||
-      sitin.laboratory.toString().includes(query)
+      sitin.laboratory.toString().includes(query) ||
+      sitin.pcno.toString().includes(query)
     )
   })
 })
@@ -132,6 +137,7 @@ const formatDateTime = (dateString: string) => {
                 <TableHead>Year</TableHead>
                 <TableHead>Purpose</TableHead>
                 <TableHead>Lab</TableHead>
+                <TableHead>PC</TableHead>
                 <TableHead>Time In</TableHead>
                 <TableHead class="text-right">Actions</TableHead>
               </TableRow>
@@ -164,6 +170,9 @@ const formatDateTime = (dateString: string) => {
                 </TableCell>
                 <TableCell>
                   Lab {{ sitin.laboratory }}
+                </TableCell>
+                <TableCell>
+                  PC {{ sitin.pcno }}
                 </TableCell>
                 <TableCell>
                   <div class="flex items-center gap-2">

@@ -91,7 +91,7 @@
               <td class="px-6 py-4 whitespace-nowrap">
                 <div class="text-sm text-white">
                   {{ formatDate(reservation.date) }} at {{ reservation.startTime }}
-                  <span v-if="reservation.startTime.length > 5">PM</span> <span v-else>AM</span>
+                  <span v-if="reservation.startTime.length == 5 && Number(reservation.startTime[1]) >= 2">PM</span> <span v-else>AM</span>
                 </div>
               </td>
               <td class="px-6 py-4 whitespace-nowrap">
@@ -106,7 +106,7 @@
               <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                 <div class="flex justify-end space-x-2">
                   <button
-                    @click="approveReservation(reservation.id, reservation.pcno, reservation.labno)"
+                    @click="confirmApprove(reservation)"
                     class="text-green-400 hover:text-green-300"
                     :disabled="processingAction"
                   >
@@ -115,7 +115,7 @@
                     </svg>
                   </button>
                   <button
-                    @click="declineReservation(reservation.id)"
+                    @click="confirmDecline(reservation)"
                     class="text-red-400 hover:text-red-300"
                     :disabled="processingAction"
                   >
@@ -209,7 +209,11 @@
                 </h3>
                 <div>
                   <p class="text-sm text-gray-400">Date</p>
-                  <p class="text-white">{{ formatDate(selectedReservation.startTime) }}</p>
+                  <p class="text-white">{{ formatDate(selectedReservation.date) }}</p>
+                </div>
+                <div>
+                  <p class="text-sm text-gray-400">Time</p>
+                  <p class="text-white">{{ selectedReservation.startTime }}</p>
                 </div>
                 <div>
                   <p class="text-sm text-gray-400">Laboratory</p>
@@ -229,18 +233,60 @@
             <!-- Action Buttons -->
             <div class="flex justify-end space-x-3 mt-6">
               <button
-                @click="declineReservation(selectedReservation.id)"
+                @click="confirmDecline(selectedReservation)"
                 class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500"
                 :disabled="processingAction"
               >
                 Decline
               </button>
               <button
-                @click="approveReservation(selectedReservation.id, selectedReservation.pcno, selectedReservation.labno)"
+                @click="confirmApprove(selectedReservation)"
                 class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500"
                 :disabled="processingAction"
               >
                 Approve
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Confirmation Dialog -->
+      <div v-if="showConfirmationDialog" class="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+        <div class="bg-gray-800 rounded-lg shadow-xl max-w-md w-full">
+          <div class="p-6">
+            <div class="flex justify-between items-start mb-4">
+              <h2 class="text-xl font-bold text-white">
+                {{ confirmationAction === 'approve' ? 'Approve Reservation' : 'Decline Reservation' }}
+              </h2>
+              <button @click="showConfirmationDialog = false" class="text-gray-400 hover:text-white">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            <p class="text-gray-300 mb-6">
+              Are you sure you want to {{ confirmationAction === 'approve' ? 'approve' : 'decline' }} this reservation?
+            </p>
+
+            <div class="flex justify-end space-x-3">
+              <button
+                @click="showConfirmationDialog = false"
+                class="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500"
+              >
+                Cancel
+              </button>
+              <button
+                @click="executeAction"
+                class="px-4 py-2"
+                :class="{
+                  'bg-green-600 hover:bg-green-700 focus:ring-green-500 rounded-md': confirmationAction === 'approve',
+                  'bg-red-600 hover:bg-red-700 focus:ring-red-500 rounded-md': confirmationAction === 'decline'
+                }"
+                :disabled="processingAction"
+              >
+                {{ confirmationAction === 'approve' ? 'Approve' : 'Decline' }}
               </button>
             </div>
           </div>
@@ -278,6 +324,7 @@ import {
   declineReservation as apiDeclineReservation,
 } from '@/../api/reservation'
 import { updatePCAvailability } from '@/../api/pc'
+import { addSitinFromReservation } from '@/../api/sitin'
 
 interface Reservation {
   id: string
@@ -324,6 +371,11 @@ const loadingReservations = ref(false)
 const selectedReservation = ref<Reservation | null>(null)
 const processingAction = ref(false)
 
+// Confirmation dialog
+const showConfirmationDialog = ref(false)
+const confirmationAction = ref<'approve' | 'decline'>('approve')
+const selectedReservationForAction = ref<Reservation | null>(null)
+
 // Notification
 const notification = ref({
   show: false,
@@ -368,8 +420,9 @@ const filteredReservations = computed(() => {
 const loadReservations = async () => {
   loadingReservations.value = true
   try {
-    const data = (await getReservations()).filter((reservation: Reservation) => reservation.status == null)
-    reservations.value = data
+    const data = await getReservations()
+    // Filter for reservations with null status (pending)
+    reservations.value = data.filter((reservation: Reservation) => reservation.status == null)
   } catch (error) {
     console.error('Error loading reservations:', error)
     showNotification('Failed to load reservations', false)
@@ -388,54 +441,73 @@ const formatDate = (dateString: string) => {
   return new Date(dateString).toLocaleDateString(undefined, options)
 }
 
+const formatDateToYMD = (dateString: string) => {
+  const date = new Date(dateString);
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are 0-indexed
+  const day = String(date.getDate()).padStart(2, '0');
+  
+  return `${year}-${month}-${day}`;
+};
+
 const viewDetails = (reservation: Reservation) => {
   selectedReservation.value = reservation
 }
 
-const approveReservation = async (reservationId: string, pcno: string, labno: string) => {
+const confirmApprove = (reservation: Reservation) => {
+  confirmationAction.value = 'approve'
+  selectedReservationForAction.value = reservation
+  showConfirmationDialog.value = true
+}
+
+const confirmDecline = (reservation: Reservation) => {
+  confirmationAction.value = 'decline'
+  selectedReservationForAction.value = reservation
+  showConfirmationDialog.value = true
+}
+
+const executeAction = async () => {
+  if (!selectedReservationForAction.value) return
+  
   processingAction.value = true
+  showConfirmationDialog.value = false
+  
   try {
-    await apiApproveReservation(reservationId)
-    showNotification('Reservation approved', true)
-    
-    // Update the local reservation data
-    const index = reservations.value.findIndex(r => r.id === reservationId)
-    if (index !== -1) {
-      reservations.value[index].status = 'approved'
+    if (confirmationAction.value === 'approve') {
+      const res = selectedReservationForAction.value
+      await apiApproveReservation(res.id)
+      showNotification('Reservation approved', true)
+      
+      await updatePCAvailability(Number(res.pcno), Number(res.labno), 'unavailable')
+      const origin =  'reservation'
+      await addSitin(Number(res.id), Number(res.idno), formatDateToYMD(res.date), res.startTime, Number(res.pcno), res.purpose, Number(res.labno), origin)
+    } else {
+      await apiDeclineReservation(selectedReservationForAction.value.id)
+      showNotification('Reservation declined', true)
     }
-    
-    if (selectedReservation.value?.id === reservationId) {
-      selectedReservation.value.status = 'approved'
+
+    // Reload reservations after action
+    await loadReservations()
+
+    // Close details modal if open
+    if (selectedReservation.value?.id === selectedReservationForAction.value?.id) {
+      selectedReservation.value = null
     }
-    await updatePCAvailability(Number(pcno), Number(labno), 'unavailable')
   } catch (error) {
-    console.error('Error approving reservation:', error)
-    showNotification('Failed to approve reservation', false)
+    console.error(`Error ${confirmationAction.value}ing reservation:`, error)
+    showNotification(`Failed to ${confirmationAction.value} reservation`, false)
   } finally {
     processingAction.value = false
+    selectedReservationForAction.value = null
   }
 }
 
-const declineReservation = async (reservationId: string) => {
-  processingAction.value = true
-  try {
-    await apiDeclineReservation(reservationId)
-    showNotification('Reservation declined', true)
-    
-    // Update the local reservation data
-    const index = reservations.value.findIndex(r => r.id === reservationId)
-    if (index !== -1) {
-      reservations.value[index].status = 'declined'
-    }
-    
-    if (selectedReservation.value?.id === reservationId) {
-      selectedReservation.value.status = 'declined'
-    }
+const addSitin = async(id:number,idno: number, date: string, startTime: string, pcno: number, purpose: string, labno: number, origin: string) => {
+  try{
+    await addSitinFromReservation(id,idno, date, startTime, pcno, purpose, labno, origin)
   } catch (error) {
-    console.error('Error declining reservation:', error)
-    showNotification('Failed to decline reservation', false)
-  } finally {
-    processingAction.value = false
+    console.error('Error adding sit-in:', error)
+    showNotification('Failed to add sit-in', false)
   }
 }
 

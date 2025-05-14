@@ -21,6 +21,7 @@ import LaboratoryScheduleView from '@/views/admin/LaboratoryScheduleView.vue';
 import LaboratoryScheduleStudentView from '@/views/student/LaboratoryScheduleView.vue';
 import ComputerManagementView from '@/views/admin/ComputerManagementView.vue';
 import ReservationsView from '@/views/admin/ReservationsView.vue';
+import ReservationLogsView from '@/views/admin/ReservationLogsView.vue';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -134,6 +135,11 @@ const router = createRouter({
       path: '/reservations',
       name: 'reservations',
       component: ReservationsView
+    },
+    {
+      path: '/reservation-logs',
+      name: 'reservation-logs',
+      component: ReservationLogsView
     }
   ],
 })

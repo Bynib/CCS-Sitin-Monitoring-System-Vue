@@ -11,10 +11,18 @@ export const findSitin = async(id: string)=>{
     return response.data;
 }
 
-export const addSitin = async (sitin: {idno: number, purpose: string, laboratory: number}) => {
+export const addSitin = async (sitin: {idno: number, purpose: string, laboratory: number, pcno: number, origin: string}) => {
     const response = await axios.post("http://localhost:3000/sitin/", sitin)
     return response.data;
 }
+
+export const addSitinFromReservation = async (id:number, idno: number, date: string, startTime: string, pcno: number, purpose: string, labno: number, origin: string) => {
+    // console.log(`CREATE EVENT add_sitin_on_schedule ON SCHEDULE AT '${date} ${startTime}:00' DO INSERT INTO sitin (idno, purpose, laboratory, pcno) VALUES (${idno}, '${purpose}', '${labno}', '${pcno}')`);
+
+    const response = await axios.post("http://localhost:3000/sitin/add", {id, idno, date, startTime, pcno, purpose, labno, origin});
+    return response.data;
+}
+
 export const updateSitinTime = async (sitin_id: number) => {
     const response = await axios.put(`http://localhost:3000/sitin/update/time/${sitin_id}`, sitin_id)
     return response.data;
