@@ -325,6 +325,7 @@ import {
 } from '@/../api/reservation'
 import { updatePCAvailability } from '@/../api/pc'
 import { addSitinFromReservation } from '@/../api/sitin'
+import { addNotification } from '@/../api/notification'
 
 interface Reservation {
   id: string
@@ -472,17 +473,20 @@ const executeAction = async () => {
   processingAction.value = true
   showConfirmationDialog.value = false
   
+  const res = selectedReservationForAction.value
   try {
     if (confirmationAction.value === 'approve') {
-      const res = selectedReservationForAction.value
       await apiApproveReservation(res.id)
       showNotification('Reservation approved', true)
       
       await updatePCAvailability(Number(res.pcno), Number(res.labno), 'unavailable')
       const origin =  'reservation'
       await addSitin(Number(res.id), Number(res.idno), formatDateToYMD(res.date), res.startTime, Number(res.pcno), res.purpose, Number(res.labno), origin)
+      await addNotification('Reservation Accepted', `Reservation for LAB ${formatDate(res.labno)} PC ${res.pcno} on ${formatDate(res.date)} at ${res.startTime} was accepted by laboratory admin.`, res.idno)
     } else {
       await apiDeclineReservation(selectedReservationForAction.value.id)
+      await addNotification('Reservation Declined', `Reservation for LAB ${res.labno} PC ${res.pcno} on ${formatDate(res.date)} at ${res.startTime} was declined by laboratory admin.`, res.idno)
+
       showNotification('Reservation declined', true)
     }
 

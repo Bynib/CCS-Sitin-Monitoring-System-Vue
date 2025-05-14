@@ -22,6 +22,7 @@ import LaboratoryScheduleStudentView from '@/views/student/LaboratoryScheduleVie
 import ComputerManagementView from '@/views/admin/ComputerManagementView.vue';
 import ReservationsView from '@/views/admin/ReservationsView.vue';
 import ReservationLogsView from '@/views/admin/ReservationLogsView.vue';
+import ReservationsStudentView from '@/views/student/ReservationHistoryView.vue';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -140,7 +141,12 @@ const router = createRouter({
       path: '/reservation-logs',
       name: 'reservation-logs',
       component: ReservationLogsView
-    }
+    },
+    {
+      path: '/reservation-history',
+      name: 'reservation-history',
+      component: ReservationsStudentView
+    },
   ],
 })
 

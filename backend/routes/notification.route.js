@@ -22,5 +22,38 @@ router.get('/', (req, res) => {
     });
 })
 
+router.get('/find/:id', (req, res) => {
+    const id = req.params.id;
+    connection.query("SELECT * FROM Notification WHERE notif_id = ?", [id], (err, rows, fields) => {
+        if (err) throw err;
+        res.json(rows);
+    });
+})
+
+router.put('/update/:id', (req, res) => {
+    const id = req.params.id;
+    const {status} = req.body;
+    connection.query("UPDATE notification SET status = ? WHERE notif_id = ?", [status, id], (err, rows, fields) => {
+        if (err) throw err;
+        res.json(rows);
+    })
+})
+
+router.put('/updateall/:idno', (req, res) => {
+    const idno = req.params.idno;
+    console.log("idno: ", idno)
+    connection.query("UPDATE notification SET status = 'read' WHERE recipient_id = ?", [idno], (err, rows, fields) => {
+        if (err) throw err;
+        res.json(rows);
+    })
+})
+
+router.delete('/delete/:id', (req, res) => {
+    const notif_id = req.params.id;
+    connection.query("DELETE FROM notification WHERE notif_id = ?", [notif_id], (err, rows, fields) => {
+        if (err) throw err;
+        res.json(rows);
+    })
+})
 
 export default router;

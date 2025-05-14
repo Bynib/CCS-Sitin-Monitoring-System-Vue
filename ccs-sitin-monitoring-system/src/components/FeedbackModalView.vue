@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { updateSitinFeedback } from '../../api/sitin'
+import {addNotification } from '../../api/notification'
 import { toast } from 'vue-sonner'
 
 // Shadcn components
@@ -14,12 +15,14 @@ import {
   DialogDescription,
   DialogFooter,
 } from '@/components/ui/dialog'
+import { useStudentStore } from '@/stores/student.store'
 
 const props = defineProps<{
   sitin_id: number
   open: boolean
 }>()
 
+const studentStore = useStudentStore()
 const emit = defineEmits(['close', 'submitted'])
 
 const feedback = ref('')
@@ -29,13 +32,36 @@ const handleCancel = () => {
   feedback.value = ''
   emit('close')
 }
-
+const foulWords = [
+  'piste',
+  'pisti',
+  'bwesit',
+  'yawa',
+  'fuck',
+  'shit',
+  'ass',
+  'asshole',
+  'assh0le',
+  'bullshit',
+  'shet',
+]
+const checkFoulWords = (feedback: string) => {
+  if (!feedback) return false
+  return foulWords.some((word) => feedback.toLowerCase().includes(word))
+}
 const handleFeedback = async () => {
   try {
     isSubmitting.value = true
     await updateSitinFeedback(props.sitin_id, feedback.value)
     
     toast.success('Feedback submitted successfully')
+
+    if (checkFoulWords(feedback.value)) {
+      await addNotification('Foul Words Detected', `Feedback submitted by ${studentStore.student.idNo}`, '1000')
+    } else{
+
+      await addNotification('Feedback', `Feedback submitted by ${studentStore.student.idNo}`, '1000')
+    }
     
     emit('submitted')
     feedback.value = ''
