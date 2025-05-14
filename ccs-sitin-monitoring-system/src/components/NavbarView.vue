@@ -302,7 +302,7 @@ const readNotifications = computed(() => {
 const markAllAsRead = async () => {
   try {
     await updateAllNotificationStatus(Number(studentStore.student.idNo))
-    notifications.value = await getNotifications()
+    notifications.value = (await getNotifications()).filter((notification: any) => notification.recipient_id === studentStore.student.idNo)
     unreadCount.value = notifications.value.filter(
       (notification: any) => notification.status === 'unread',
     ).length
