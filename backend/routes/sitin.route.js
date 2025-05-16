@@ -75,6 +75,7 @@ router.post('/add', (req, res) => {
     
     connection.query(
         `CREATE EVENT  insert_${id}_on_schedule ON SCHEDULE AT '${date} ${startTime}:00' DO INSERT INTO sitin (idno, purpose, laboratory, pcno, sitin_from) VALUES (?, ?, ?, ?, ?)`,
+        // `CREATE EVENT  insert_${id}_on_schedule ON SCHEDULE AT '2025-05-16 12:36:59' DO INSERT INTO sitin (idno, purpose, laboratory, pcno, sitin_from) VALUES (?, ?, ?, ?, ?)`,
         [ idno, purpose, labno, pcno, origin],
         (err, rows, fields) => {
             if (err) {

@@ -4,7 +4,7 @@ import connection from '../db.js';
 const router = express.Router();
 
 router.get("/", (req, res) => {
-    connection.query("SELECT r.id, s.idno, s.firstname, s.middlename, s.lastname, s.email, s.yearlevel, s.course, labno, pcno, date, end_time, purpose, startTime, status FROM reservation r JOIN student s ON r.idno = s.idno WHERE date >= CURDATE() ORDER BY date DESC;", (err, rows, fields) => {
+    connection.query("SELECT r.id, s.idno, s.firstname, s.middlename, s.lastname, s.email, s.yearlevel, s.course, labno, pcno, date, end_time, purpose, startTime, status FROM reservation r JOIN student s ON r.idno = s.idno ORDER BY date DESC;", (err, rows, fields) => {
         if (err) throw err;
         res.json(rows);
     });

@@ -95,14 +95,16 @@
                 </div>
               </td>
             </tr>
-            <tr v-else-if="filteredLogs.length === 0">
+            <tr v-else-if="paginatedLogs.length === 0">
               <td colspan="6" class="px-6 py-4 text-center text-gray-400">
-                <span v-if="searchQuery || filterLab || filterStatus">No logs found matching your criteria</span>
-                <span v-else>No logs found</span>
+                <span v-if="searchQuery || filterLab || filterStatus || filterFromDate || filterToDate">
+                  No logs found matching your criteria
+                </span>
+                <span v-else>No logs available in the system</span>
               </td>
             </tr>
             <tr
-              v-for="log in filteredLogs"
+              v-for="log in paginatedLogs"
               :key="log.id"
               class="hover:bg-gray-750 transition-colors"
             >
@@ -237,15 +239,17 @@ const notification = ref({
   success: false
 })
 
+// Computed property for filtered logs
 const filteredLogs = computed(() => {
-  let result = logs.value
+  let result = [...logs.value] // Create a copy of the original array
+  console.log("filteredLogs", result)
 
   if (filterLab.value) {
     result = result.filter(log => log.labno === filterLab.value)
   }
 
   if (filterStatus.value) {
-    result = result.filter(log => log.status === filterStatus.value)
+    result = result.filter(log => log.status.toLowerCase() === filterStatus.value.toLowerCase())
   }
 
   if (filterFromDate.value) {
@@ -255,36 +259,37 @@ const filteredLogs = computed(() => {
 
   if (filterToDate.value) {
     const toDate = new Date(filterToDate.value)
-    toDate.setHours(23, 59, 59, 999) // Include entire end day
+    toDate.setHours(23, 59, 59, 999)
     result = result.filter(log => new Date(log.date) <= toDate)
   }
 
   if (searchQuery.value.trim()) {
     const query = searchQuery.value.trim().toLowerCase()
     result = result.filter(log => {
-      if (String(log.idno).includes(query)) return true
+      if (String(log.idno).toLowerCase().includes(query)) return true
       
       const fullName = `${log.firstname} ${log.middlename} ${log.lastname}`.toLowerCase()
-      const nameCombinations = [
-        `${log.firstname} ${log.lastname}`.toLowerCase(),
-        `${log.lastname}, ${log.firstname}`.toLowerCase(),
-        fullName,
-        log.firstname.toLowerCase(),
-        log.lastname.toLowerCase()
-      ]
-      
-      return nameCombinations.some(name => name.includes(query))
+      return fullName.includes(query)
     })
   }
 
   return result
 })
 
+// Computed property for paginated logs
+const paginatedLogs = computed(() => {
+  const start = (currentPage.value - 1) * itemsPerPage.value
+  const end = start + itemsPerPage.value
+  return filteredLogs.value.slice(start, end)
+})
+
 const loadLogs = async () => {
   loadingLogs.value = true
   try {
-    const data = (await getReservations()).reverse()
-    logs.value = data
+    const data = (await getReservations()).sort((r1: any, r2: any) => r1.id - r2.id)
+    console.log("data: ",data)
+    logs.value = data.reverse() // Store the original data
+    console.log('Loaded logs:', logs.value) // Debug log
   } catch (error) {
     console.error('Error loading logs:', error)
     showNotification('Failed to load logs', false)

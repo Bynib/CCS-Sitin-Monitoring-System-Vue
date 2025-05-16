@@ -302,7 +302,7 @@ const readNotifications = computed(() => {
 const markAllAsRead = async () => {
   try {
     await updateAllNotificationStatus(Number(studentStore.student.idNo))
-    notifications.value = (await getNotifications()).filter((notification: any) => notification.recipient_id === studentStore.student.idNo)
+    notifications.value = (await getNotifications()).filter((notification: any) => notification.recipient_id === studentStore.student.idNo).reverse()
     unreadCount.value = notifications.value.filter(
       (notification: any) => notification.status === 'unread',
     ).length
@@ -421,7 +421,7 @@ const logOut = () => {
 onMounted(async () => {
   notifications.value = (await getNotifications()).filter(
     (notification: any) => notification.recipient_id === studentStore.student.idNo,
-  )
+  ).reverse()
   console.log(notifications.value)
   unreadCount.value = notifications.value.filter(
     (notification: any) => notification.status === 'unread',

@@ -216,31 +216,57 @@ const notification = ref({
 })
 
 const filteredLogs = computed(() => {
-  let result = logs.value
+  // Start with all logs (they're already filtered by student ID in loadLogs)
+  let result = [...logs.value]
 
-  result = result.filter(log => log.idno === studentStore.student.idNo)
-
+  // Filter by status if specified
   if (filterStatus.value) {
-    result = result.filter(log => log.status === filterStatus.value)
+    result = result.filter(log => {
+      // Handle null status as 'pending'
+      const logStatus = log.status === null ? 'pending' : log.status
+      return logStatus === filterStatus.value
+    })
   }
 
-  if (filterFromDate.value) {
-    const fromDate = new Date(filterFromDate.value)
-    result = result.filter(log => new Date(log.date) >= fromDate)
+  // Filter by date range if specified
+  if (filterFromDate.value || filterToDate.value) {
+    const fromDate = filterFromDate.value 
+      ? new Date(filterFromDate.value + 'T00:00:00')
+      : null
+    const toDate = filterToDate.value 
+      ? new Date(filterToDate.value + 'T23:59:59.999')
+      : null
+
+    result = result.filter(log => {
+      const logDate = new Date(log.date)
+      
+      // If we have both from and to dates
+      if (fromDate && toDate) {
+        return logDate >= fromDate && logDate <= toDate
+      }
+      // If only from date
+      else if (fromDate) {
+        return logDate >= fromDate
+      }
+      // If only to date
+      else if (toDate) {
+        return logDate <= toDate
+      }
+      return true
+    })
   }
 
-  if (filterToDate.value) {
-    const toDate = new Date(filterToDate.value)
-    toDate.setHours(23, 59, 59, 999) // Include entire end day
-    result = result.filter(log => new Date(log.date) <= toDate)
-  }
-
+  // Filter by PC number if specified
   if (searchPcNumber.value.trim()) {
     const query = searchPcNumber.value.trim().toLowerCase()
-    result = result.filter(log => String(log.pcno).toLowerCase().includes(query))
+    result = result.filter(log => 
+      String(log.pcno).toLowerCase().includes(query)
+    )
   }
 
-  return result.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+  return result.sort((a, b) => 
+    new Date(b.date).getTime() - new Date(a.date).getTime()
+  )
 })
 
 const paginatedLogs = computed(() => {
@@ -255,7 +281,7 @@ const hasActiveFilters = computed(() => {
 const loadLogs = async () => {
   loadingLogs.value = true
   try {
-    const data = (await getReservations()).filter((log:any) => log.idno === studentStore.student.idNo).reverse()
+    const data = (await getReservations()).reverse().filter((r: ReservationLog) => r.idno === studentStore.student.idNo)
     logs.value = data
   } catch (error) {
     console.error('Error loading reservations:', error)

@@ -2,12 +2,16 @@
 import { ref, computed, onMounted, watch, reactive } from 'vue'
 import { getAvailablePCs, createReservation } from '@/../api/reservation'
 import { addNotification } from '@/../api/notification'
+import { getLabSchedule } from '@/../api/lab_schedule'
 import { findSitin } from '@/../api/sitin'
 import { useStudentStore } from '@/stores/student.store'
 
 const studentStore = useStudentStore()
 const studentDetails = reactive({
   idno: studentStore.student.idNo,
+  firstname: studentStore.student.firstName,
+  middlename: studentStore.student.middleName,
+  lastname: studentStore.student.lastName,
   sessions: studentStore.student.sessions
 })
 
@@ -53,10 +57,19 @@ interface PC {
   status: string
 }
 
+interface Schedule {
+  id: number
+  lab_number: string
+  days: string
+  time: string
+  status: string
+}
+
 const selectedLab = ref('')
 const selectedDate = ref('')
 const selectedTimeSlot = ref('')
 const selectedPC = ref('')
+const schedules = ref<Schedule[]>([])
 const purpose = ref('')
 
 const loadingPCs = ref(false)
@@ -92,10 +105,48 @@ const checkActiveSitin = async () => {
     console.error('Error checking active sit-ins:', error)
   }
 }
+// Add this to your script setup
+const isLabOpen = ref(false)
+const loadingSchedule = ref(false)
 
+const checkLabSchedule = async () => {
+  if (!selectedLab.value || !selectedDate.value || !selectedTimeSlot.value) return
+  
+  loadingSchedule.value = true
+  try {
+    // Get the day of week (0-6 where 0 is Sunday)
+    const date = new Date(selectedDate.value)
+    const dayOfWeek = date.getDay()
+    const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+    const currentDay = days[dayOfWeek]
+    
+    // Fetch schedule for this lab and day
+    const labSchedules = await getLabSchedule(selectedLab.value)
+    schedules.value = labSchedules
+    
+    // Check if selected time is within any open schedule
+    const selectedTime = selectedTimeSlot.value
+    isLabOpen.value = labSchedules.some((schedule:Schedule) => {
+      const [openTime, closeTime] = schedule.time.split(' - ')
+      return timeSlots.value.indexOf(selectedTime) >= timeSlots.value.indexOf(openTime) && 
+             timeSlots.value.indexOf(selectedTime) <= timeSlots.value.indexOf(closeTime)
+    })
+    
+    if (!isLabOpen.value) {
+      availablePCs.value = []
+      showNotification('The selected lab is closed at this time', false)
+    }
+  } catch (error) {
+    console.error('Error checking lab schedule:', error)
+    showNotification('Failed to check lab schedule', false)
+  } finally {
+    loadingSchedule.value = false
+  }
+}
 const fetchAvailablePCs = async () => {
   if (!selectedLab.value || !selectedDate.value || !selectedTimeSlot.value || hasActiveSitin.value) return
   
+  // await checkLabSchedule()
   loadingPCs.value = true
   try {
     const response = await getAvailablePCs(
@@ -135,7 +186,7 @@ const submitReservation = async () => {
     )
     
     showNotification('Reservation submitted successfully!', true)
-    await addNotification('New Reservation', `New reservation submitted by ${studentDetails.idno}`, '1000')
+    await addNotification('New Reservation', `New reservation submitted by ${studentDetails.idno} (${studentDetails.firstname} ${studentDetails.lastname})`, '1000')
     resetForm()
   } catch (error: any) {
     console.error('Error submitting reservation:', error)

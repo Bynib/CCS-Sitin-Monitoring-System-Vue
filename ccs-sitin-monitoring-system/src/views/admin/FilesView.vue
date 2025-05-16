@@ -9,11 +9,24 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Progress } from '@/components/ui/progress'
 import { FileText, FileUp, Trash2, Download } from 'lucide-vue-next'
 import { toast } from 'vue-sonner'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 
 const selectedFile = ref<File | null>(null)
 const uploading = ref(false)
 const uploadProgress = ref(0)
 const MAX_FILE_SIZE = 45 * 1024 * 1024
+
+const deleteConfirmationOpen = ref(false)
+const fileToDelete = ref<{ id: number; filename: string } | null>(null)
 
 interface FileDetails {
   id: number
@@ -36,7 +49,7 @@ const arrayBufferToBase64 = (buffer: ArrayBuffer): string => {
 const handleFileUpload = async () => {
   if (!selectedFile.value) {
     toast.error('No file selected', {
-      description: 'Please select a file to upload'
+      description: 'Please select a file to upload',
     })
     return
   }
@@ -44,21 +57,21 @@ const handleFileUpload = async () => {
   const file = selectedFile.value
   if (file.size > MAX_FILE_SIZE) {
     toast.error('File too large', {
-      description: `Maximum file size is ${formatFileSize(MAX_FILE_SIZE)}`
+      description: `Maximum file size is ${formatFileSize(MAX_FILE_SIZE)}`,
     })
     return
   }
 
   const toastId = toast.loading('Uploading file...')
-  
+
   try {
     uploading.value = true
     uploadProgress.value = 30
-    
+
     const arrayBuffer = await file.arrayBuffer()
     uploadProgress.value = 70
     const base64String = arrayBufferToBase64(arrayBuffer)
-    
+
     await addFile({
       filename: file.name,
       filedata: base64String,
@@ -66,24 +79,24 @@ const handleFileUpload = async () => {
 
     files.value = (await getFiles()).reverse()
     uploadProgress.value = 100
-    
+
     toast.success('Upload successful', {
       description: `${file.name} has been uploaded`,
-      id: toastId
+      id: toastId,
     })
-    
+
     selectedFile.value = null
   } catch (error: any) {
     console.error(error)
     toast.error('Upload failed', {
-      description: error?.response?.data?.sqlMessage?.includes('max_allowed_packet') 
-        ? 'File too large for server' 
+      description: error?.response?.data?.sqlMessage?.includes('max_allowed_packet')
+        ? 'File too large for server'
         : 'An error occurred while uploading',
-      id: toastId
+      id: toastId,
     })
   } finally {
     uploading.value = false
-    setTimeout(() => uploadProgress.value = 0, 1000)
+    setTimeout(() => (uploadProgress.value = 0), 1000)
   }
 }
 
@@ -112,29 +125,39 @@ const downloadFile = (file: FileDetails) => {
     a.click()
     URL.revokeObjectURL(url)
     toast.success('Download started', {
-      description: `${file.filename} is being downloaded`
+      description: `${file.filename} is being downloaded`,
     })
   } catch (error) {
     toast.error('Download failed', {
-      description: 'Could not download the file'
+      description: 'Could not download the file',
     })
   }
 }
 
-const deleteFile = async (id: number, filename: string) => {
+const confirmDelete = (file: FileDetails) => {
+  fileToDelete.value = { id: file.id, filename: file.filename }
+  deleteConfirmationOpen.value = true
+}
+const deleteFile = async () => {
+  if (!fileToDelete.value) return
+
+  const { id, filename } = fileToDelete.value
   const toastId = toast.loading('Deleting file...')
   try {
     await removeFile(id)
-    files.value = files.value.filter(f => f.id !== id)
+    files.value = files.value.filter((f) => f.id !== id)
     toast.success('File deleted', {
       description: `${filename} has been removed`,
-      id: toastId
+      id: toastId,
     })
   } catch (error) {
     toast.error('Deletion failed', {
       description: 'Could not delete the file',
-      id: toastId
+      id: toastId,
     })
+  } finally {
+    deleteConfirmationOpen.value = false
+    fileToDelete.value = null
   }
 }
 
@@ -150,7 +173,7 @@ onMounted(async () => {
     files.value = (await getFiles()).reverse()
   } catch (error) {
     toast.error('Error loading files', {
-      description: 'Could not fetch file list'
+      description: 'Could not fetch file list',
     })
   }
 })
@@ -165,24 +188,15 @@ onMounted(async () => {
       <CardContent>
         <div class="flex flex-col sm:flex-row gap-4 items-center">
           <div class="grid w-full max-w-sm items-center gap-1.5">
-            <Input 
-              id="file-upload" 
-              type="file" 
-              @change="onFileSelected"
-              class="cursor-pointer"
-            />
+            <Input id="file-upload" type="file" @change="onFileSelected" class="cursor-pointer" />
             <p class="text-sm text-muted-foreground">Max file size: 45MB</p>
           </div>
-          <Button 
-            @click="handleFileUpload" 
-            :disabled="!selectedFile || uploading"
-            class="gap-2"
-          >
+          <Button @click="handleFileUpload" :disabled="!selectedFile || uploading" class="gap-2">
             <FileUp class="w-4 h-4" />
             Upload
           </Button>
         </div>
-        
+
         <Progress v-if="uploading" :model-value="uploadProgress" class="mt-4 h-2" />
       </CardContent>
     </Card>
@@ -200,9 +214,7 @@ onMounted(async () => {
             <Alert>
               <Info class="w-4 h-4" />
               <AlertTitle>No files yet...</AlertTitle>
-              <AlertDescription>
-                Upload your first file using the form above
-              </AlertDescription>
+              <AlertDescription> Upload your first file using the form above </AlertDescription>
             </Alert>
           </div>
 
@@ -222,7 +234,7 @@ onMounted(async () => {
                   <Download class="w-4 h-4 mr-2" />
                   Download
                 </Button>
-                <Button variant="destructive" size="sm" @click="deleteFile(file.id, file.filename)">
+                <Button variant="destructive" size="sm" @click="confirmDelete(file)">
                   <Trash2 class="w-4 h-4 mr-2" />
                   Delete
                 </Button>
@@ -232,5 +244,26 @@ onMounted(async () => {
         </ScrollArea>
       </CardContent>
     </Card>
+    <AlertDialog v-model:open="deleteConfirmationOpen">
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+          <AlertDialogDescription>
+            This action cannot be undone. This will permanently delete "{{
+              fileToDelete?.filename
+            }}".
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogAction
+            @click="deleteFile"
+            class="bg-destructive text-white hover:bg-destructive/90"
+          >
+            Delete
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   </div>
 </template>
