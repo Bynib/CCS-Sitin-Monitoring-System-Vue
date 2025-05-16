@@ -45,7 +45,7 @@ onMounted(async () => {
 
 const fetchStudents = async () => {
   students.value = (await getStudents()).sort((s: Student, t: Student) => 
-    Number(t.points) - Number(s.points))
+    s.lastname.localeCompare(t.lastname))
 }
 
 const resetSessions = async () => {

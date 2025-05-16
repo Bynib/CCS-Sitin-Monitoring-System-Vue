@@ -213,7 +213,7 @@ const formatDateTime = (dateString: string) => {
 
           <div v-else class="flex flex-col items-center justify-center py-12 text-muted-foreground">
             <p class="text-lg">No active sit-ins found</p>
-            <p class="text-sm">Students will appear here when they check in</p>
+            <p class="text-sm">Students will appear here when they sit in</p>
           </div>
         </ScrollArea>
       </CardContent>
